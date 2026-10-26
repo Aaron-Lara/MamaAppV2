@@ -39,3 +39,25 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Proyecto: app POS e inventario (cooperativa escolar)
+Stack: Expo + TypeScript + expo-sqlite (offline-first).
+Provisional: las reglas del negocio se ajustarán tras hablar con la usuaria.
+
+### Arquitectura
+- Lógica de datos en src/db/. Las pantallas no escriben SQL.
+- La IA (voz, foto, resúmenes) va en src/ai/, detrás de funciones aisladas.
+  Nunca bloquea el registro de una venta.
+- La app debe funcionar sin internet.
+- Archivos de menos de 150 líneas. Variables en inglés, comentarios en español.
+
+### Reglas del negocio
+- Cada venta descuenta insumos según la receta del producto.
+- Ganancia = ventas - costo de lo vendido - gastos.
+- Dinero siempre en centavos (enteros), nunca en decimales.
+
+### Forma de trabajar
+- Responde en español. Ante ambigüedad, haz máximo 3 preguntas.
+- No instales dependencias sin preguntarme; si lo apruebo, usa `npx expo install <paquete>`.
+- Una tarea pequeña a la vez; no toques archivos que no te pedí.
+- Antes de dar una tarea por terminada, ejecuta lint y `npx tsc --noEmit`, e indica qué cambió.
