@@ -7,6 +7,10 @@
     { "action": "websearch", "resource": "*", "effect": "ask" },
     // Opcionales: comandos de solo lectura sin preguntar
     { "action": "shell", "resource": "git status*", "effect": "allow" },
-    { "action": "shell", "resource": "git diff*", "effect": "allow" }
+    { "action": "shell", "resource": "git diff*", "effect": "allow" },
+    { "action": "webfetch", "resource": "https://docs.expo.dev/*", "effect": "allow" },
+    { "action": "shell", "resource": "git log*", "effect": "allow" },
+    { "action": "shell", "resource": "npx tsc --noEmit*", "effect": "allow" },
+    { "action": "shell", "resource": "npx expo lint*", "effect": "allow" }
   ]
 }
