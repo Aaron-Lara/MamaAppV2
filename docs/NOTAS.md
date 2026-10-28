@@ -1,3 +1,3 @@
-Hecho: entorno configurado (Ollama 14B con contexto 12288, Cline, reglas, repositorio, proyecto Expo con TypeScript).
-Decisiones tomadas: React Native con Expo y APK en Android, TypeScript con strict: false, SQLite local, IA siempre aislada en src/ai/, dinero en centavos.
-Pendiente: entrevista a tu mamá, esquema de base de datos, limpiar la plantilla de Expo, primeras tareas con Cline.
+Hecho: plantilla de Expo limpia, ESLint configurado, tsc y lint sin errores, OpenCode con modelo gratuito y permisos configurados.
+Decisiones: strict: true (corrige la línea vieja), app solo para Android, el agente arranca en Plan, commits antes de cada tarea.
+Pendiente: expo-sqlite, docs/SUPUESTOS.md, esquema de base de datos.
