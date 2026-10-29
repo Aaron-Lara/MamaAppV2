@@ -9,6 +9,8 @@ export type RecentSale = {
   payment_method: 'cash' | 'credit';
   customer_name: string | null;
   items_sum_cents: number;
+  status: 'active' | 'void';
+  void_reason: string | null;
 };
 
 export type SalesSummary = {
@@ -39,7 +41,7 @@ export function countCustomers(db: SQLiteDatabase): Promise<number> {
 }
 
 const SALE_SELECT = `
-  SELECT s.id, s.total_cents, s.payment_method,
+  SELECT s.id, s.total_cents, s.payment_method, s.status, s.void_reason,
          c.name AS customer_name,
          COALESCE(SUM(si.quantity * si.unit_price_cents), 0) AS items_sum_cents
   FROM sales s

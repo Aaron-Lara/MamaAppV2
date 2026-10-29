@@ -9,7 +9,17 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 export const DATABASE_NAME = 'pos.db';
 
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
+
+/** true si la tabla ya tiene esa columna (ALTER TABLE no admite IF NOT EXISTS). */
+async function hasColumn(
+  db: SQLiteDatabase,
+  table: string,
+  column: string
+): Promise<boolean> {
+  const rows = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
+  return rows.some((row) => row.name === column);
+}
 
 /** Aplica las migraciones pendientes y deja la base lista para usarse. */
 export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
@@ -106,6 +116,17 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
         ON stock_movements (product_id);
     `);
     currentVersion = 3;
+  }
+
+  // Versión 4: anulación de ventas (fecha y motivo, ambos opcionales).
+  if (currentVersion === 3) {
+    // Nombres internos, nunca del usuario: se pueden interpolar.
+    for (const column of ['voided_at', 'void_reason'] as const) {
+      if (!(await hasColumn(db, 'sales', column))) {
+        await db.execAsync(`ALTER TABLE sales ADD COLUMN ${column} TEXT`);
+      }
+    }
+    currentVersion = 4;
   }
 
   // user_version guarda un entero, así que se interpola (valor interno, no del usuario).
