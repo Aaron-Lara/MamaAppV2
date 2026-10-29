@@ -4,6 +4,7 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { getCustomerBalance } from '@/db/balances';
 import { localDateString } from '@/lib/dates';
 import { validateVoidInput } from '@/lib/void-input';
 
@@ -28,12 +29,32 @@ export async function voidSale(
 
   await db.withExclusiveTransactionAsync(async (txn) => {
     // La conexión exclusiva nace con foreign_keys en OFF: verificamos a mano.
-    const sale = await txn.getFirstAsync<{ id: number }>(
-      'SELECT id FROM sales WHERE id = $id',
+    const sale = await txn.getFirstAsync<{
+      id: number;
+      customer_id: number | null;
+      payment_method: 'cash' | 'credit';
+      total_cents: number;
+      status: 'active' | 'void';
+    }>(
+      `SELECT id, customer_id, payment_method, total_cents, status
+         FROM sales WHERE id = $id`,
       { $id: saleId }
     );
     if (!sale) {
       throw new Error(`La venta ${saleId} no existe.`);
+    }
+
+    // Si es una venta fiada activa, los abonos no pueden dejar el saldo en
+    // negativo al quitarla. Todo esto corre antes de escribir nada.
+    if (
+      sale.status === 'active' &&
+      sale.payment_method === 'credit' &&
+      sale.customer_id !== null
+    ) {
+      const balance = await getCustomerBalance(txn, sale.customer_id);
+      if (balance - sale.total_cents < 0) {
+        throw new Error('Primero anula los abonos de ese cliente');
+      }
     }
 
     // Defensa: si ya hay compensaciones para esta venta, no se duplican.

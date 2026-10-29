@@ -7,9 +7,11 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { migrateToV5 } from '@/db/migration-v5-payments';
+
 export const DATABASE_NAME = 'pos.db';
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 /** true si la tabla ya tiene esa columna (ALTER TABLE no admite IF NOT EXISTS). */
 async function hasColumn(
@@ -127,6 +129,12 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
       }
     }
     currentVersion = 4;
+  }
+
+  // Versión 5: abonos de fiados (tabla payments e índice por cliente).
+  if (currentVersion === 4) {
+    await migrateToV5(db);
+    currentVersion = 5;
   }
 
   // user_version guarda un entero, así que se interpola (valor interno, no del usuario).
