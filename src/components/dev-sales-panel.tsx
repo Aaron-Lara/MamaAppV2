@@ -6,6 +6,7 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { DEV_CASES, runDevCase, type DevCaseId } from '@/components/dev-sales-cases';
 import { DevSalesReport } from '@/components/dev-sales-report';
+import { DEV_STOCK_CASES, isStockCase, runStockCase, type DevStockCaseId } from '@/components/dev-stock-cases';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -19,6 +20,10 @@ const EMPTY_SUMMARY: SalesSummary = {
   recentSales: [],
 };
 
+type AnyCaseId = DevCaseId | DevStockCaseId;
+
+const ALL_CASES = [...DEV_CASES, ...DEV_STOCK_CASES];
+
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : 'Error desconocido.';
 }
@@ -27,7 +32,7 @@ export function DevSalesPanel() {
   const db = useSQLiteContext();
   const theme = useTheme();
   const [summary, setSummary] = useState<SalesSummary>(EMPTY_SUMMARY);
-  const [busyId, setBusyId] = useState<DevCaseId | null>(null);
+  const [busyId, setBusyId] = useState<AnyCaseId | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   const refresh = useCallback(async () => {
@@ -54,10 +59,10 @@ export function DevSalesPanel() {
     };
   }, [db]);
 
-  const run = async (id: DevCaseId) => {
+  const run = async (id: AnyCaseId) => {
     setBusyId(id);
     try {
-      const result = await runDevCase(db, id);
+      const result = isStockCase(id) ? await runStockCase(db, id) : await runDevCase(db, id);
       setMessage({ ok: result.ok, text: result.message });
       await refresh();
     } catch (err) {
@@ -69,10 +74,10 @@ export function DevSalesPanel() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="smallBold">Panel de pruebas · recordSale</ThemedText>
+      <ThemedText type="smallBold">Panel de pruebas · recordSale y stock</ThemedText>
       <DevSalesReport summary={summary} />
 
-      {DEV_CASES.map((testCase) => (
+      {ALL_CASES.map((testCase) => (
         <Pressable
           key={testCase.id}
           onPress={() => run(testCase.id)}
