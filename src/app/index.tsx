@@ -3,6 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 
+import { DevSalesPanel } from '@/components/dev-sales-panel';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -89,6 +90,7 @@ export default function HomeScreen() {
         data={products}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
+        ListHeaderComponent={<DevSalesPanel />}
         ListEmptyComponent={
           <ThemedText type="small" themeColor="textSecondary">
             Todavía no hay productos.
