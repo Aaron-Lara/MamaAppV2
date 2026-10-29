@@ -61,3 +61,5 @@ Provisional: las reglas del negocio se ajustarán tras hablar con la usuaria.
 - No instales dependencias sin preguntarme; si lo apruebo, usa `npx expo install <paquete>`.
 - Una tarea pequeña a la vez; no toques archivos que no te pedí.
 - Antes de dar una tarea por terminada, ejecuta lint y `npx tsc --noEmit`, e indica qué cambió.
+
+- Las listas largas usan FlatList, nunca ScrollView con map

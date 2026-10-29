@@ -10,6 +10,7 @@
 - También recibe pedidos.
 - La app anterior tenía: inventario con avisos de stock, fiados y pedidos,
   e historial de acciones con fecha.
+- el resumen del día puede prepararse cerca de la 1 pm, el recreo concentra las ventas y los “frecuentes” pueden calcularse con ese patrón
 
 ## Lo que supongo (confirmar)
 - Recibe ticket en las compras.
