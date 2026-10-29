@@ -3,6 +3,7 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { insertSaleStockMovements } from '@/db/stock-sales';
 import { isValidDateString, localDateString } from '@/lib/dates';
 import { lineTotalCents, sumCents } from '@/lib/money';
 
@@ -137,6 +138,8 @@ export async function recordSale(db: SQLiteDatabase, input: NewSale): Promise<nu
     } finally {
       await statement.finalizeAsync();
     }
+    // Dentro de la misma transacción: la venta y su salida de stock viven o mueren juntas.
+    await insertSaleStockMovements(txn, { saleId, movementDate: saleDate, lines: items });
   });
 
   if (saleId === 0) {

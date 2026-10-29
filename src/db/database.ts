@@ -9,7 +9,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 export const DATABASE_NAME = 'pos.db';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 /** Aplica las migraciones pendientes y deja la base lista para usarse. */
 export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
@@ -79,6 +79,33 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_sale_items_sale ON sale_items (sale_id);
     `);
     currentVersion = 2;
+  }
+
+  // Versión 3: movimientos de inventario (entradas, salidas y ajustes).
+  // Cada renglón es un movimiento inmutable: el stock es la suma de quantity.
+  if (currentVersion === 2) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS stock_movements (
+        id INTEGER PRIMARY KEY NOT NULL,
+        product_id INTEGER NOT NULL REFERENCES products (id),
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        -- Fecha local del teléfono, para agrupar por día sin depender de UTC.
+        movement_date TEXT NOT NULL
+          CHECK (movement_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+        -- Positivo entra, negativo sale. Nunca cero.
+        quantity INTEGER NOT NULL CHECK (quantity <> 0),
+        reason TEXT NOT NULL
+          CHECK (reason IN ('purchase', 'sale', 'adjustment', 'waste', 'void')),
+        reference_id INTEGER,
+        note TEXT,
+        -- Un movimiento de venta siempre apunta a su venta.
+        CHECK (reason <> 'sale' OR reference_id IS NOT NULL)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_stock_movements_product
+        ON stock_movements (product_id);
+    `);
+    currentVersion = 3;
   }
 
   // user_version guarda un entero, así que se interpola (valor interno, no del usuario).
