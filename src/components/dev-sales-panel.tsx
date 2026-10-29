@@ -7,6 +7,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import { DEV_CASES, runDevCase, type DevCaseId } from '@/components/dev-sales-cases';
 import { DevSalesReport } from '@/components/dev-sales-report';
 import { DEV_STOCK_CASES, isStockCase, runStockCase, type DevStockCaseId } from '@/components/dev-stock-cases';
+import { DEV_VOID_CASES, isVoidCase, runVoidCase, type DevVoidCaseId } from '@/components/dev-void-cases';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -20,9 +21,9 @@ const EMPTY_SUMMARY: SalesSummary = {
   recentSales: [],
 };
 
-type AnyCaseId = DevCaseId | DevStockCaseId;
+type AnyCaseId = DevCaseId | DevStockCaseId | DevVoidCaseId;
 
-const ALL_CASES = [...DEV_CASES, ...DEV_STOCK_CASES];
+const ALL_CASES = [...DEV_CASES, ...DEV_STOCK_CASES, ...DEV_VOID_CASES];
 
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : 'Error desconocido.';
@@ -62,7 +63,11 @@ export function DevSalesPanel() {
   const run = async (id: AnyCaseId) => {
     setBusyId(id);
     try {
-      const result = isStockCase(id) ? await runStockCase(db, id) : await runDevCase(db, id);
+      const result = isStockCase(id)
+        ? await runStockCase(db, id)
+        : isVoidCase(id)
+          ? await runVoidCase(db, id)
+          : await runDevCase(db, id);
       setMessage({ ok: result.ok, text: result.message });
       await refresh();
     } catch (err) {

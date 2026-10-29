@@ -15,8 +15,8 @@ import {
 } from '@/db/stock';
 import { formatStockLabel } from '@/lib/stock-label';
 
-const STOCK_PRODUCT = 'TEST stock';
-const PRICE_CENTS = 1000;
+export const STOCK_PRODUCT = 'TEST stock';
+export const PRICE_CENTS = 1000;
 const MIN_STOCK = 5;
 
 export type DevStockCaseId = 'stockCreate' | 'stockSell3' | 'stockSell9';
@@ -38,7 +38,7 @@ function errorText(err: unknown): string {
 }
 
 /** Crea o reutiliza "TEST stock" y lo deja con la cantidad pedida. */
-async function prepareStock(
+export async function prepareStock(
   db: SQLiteDatabase,
   target: number,
   note: string

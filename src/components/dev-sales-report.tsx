@@ -34,6 +34,11 @@ export function DevSalesReport({ summary }: { summary: SalesSummary }) {
             <ThemedText type="code" themeColor={matches ? 'textSecondary' : 'text'}>
               renglones {formatCents(sale.items_sum_cents)} {matches ? '✔' : '✖'}
             </ThemedText>
+            {sale.status === 'void' ? (
+              <ThemedText type="smallBold" style={styles.void}>
+                ANULADA{sale.void_reason ? ` · ${sale.void_reason}` : ''}
+              </ThemedText>
+            ) : null}
           </View>
         );
       })}
@@ -49,5 +54,8 @@ const styles = StyleSheet.create({
   },
   row: {
     gap: Spacing.half,
+  },
+  void: {
+    color: '#d93025',
   },
 });
