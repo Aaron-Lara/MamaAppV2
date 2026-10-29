@@ -1,0 +1,31 @@
+# Supuestos del negocio (provisional, 28-oct-2026)
+
+## Lo que sé
+- Vende dulces, bebidas y alimentos preparados (lonches, tacos, otros).
+  Catálogo muy variado.
+- Surte los domingos en EE. UU. (HEB, S-Mart) y algunos días en
+  dulcerías de México.
+- Fía a cualquier persona” por: “Fía a maestros, alumnos y personal de la escuela. No sé si también a gente de fuera.
+- Cobra yendo con el cliente, cuando vuelve a comprar o cuando viene a pagar.
+- También recibe pedidos.
+- La app anterior tenía: inventario con avisos de stock, fiados y pedidos,
+  e historial de acciones con fecha.
+
+## Lo que supongo (confirmar)
+- Recibe ticket en las compras.
+- Las compras en EE. UU. son en dólares; las de México, en pesos.
+- Al cierre del día cuenta el dinero y hace cuentas.
+
+## No sé
+- Qué lleva cada producto preparado (recetas, cantidades).
+- Cuántos productos distintos maneja ni cuánto vende al día.
+- Si los fiados se pagan completos o por abonos.
+- Qué hace exactamente al cierre.
+- Sus gastos fijos.
+
+## Decisiones de diseño derivadas
+- Recetas e insumos: opcionales, fase posterior.
+- Compras con moneda y tipo de cambio.
+- Clientes de nombre libre; pedidos separados de fiados.
+- Historial de acciones con fecha.
+- Reportes calculados a partir de ventas; empezar por un resumen diario.
