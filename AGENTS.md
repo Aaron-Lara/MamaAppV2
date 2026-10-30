@@ -42,7 +42,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - Nada se borra: las ventas se anulan, los productos y clientes se desactivan. Toda acción irreversible o de cantidad grande exige confirmación en pantalla. Los mensajes al usuario nunca muestran números negativos de stock
 - Los reportes, saldos y totales solo cuentan ventas con status = 'active'.
 - Anular una venta nunca la borra: marca status = 'void' y compensa el stock con movimientos 'void'.
-
+- Las fotos de tickets no se guardan: se procesan, se borra el archivo temporal y nunca se guarda su ruta. El proceso de lectura no debe bloquear ventas.
 ## Proyecto: app POS e inventario (cooperativa escolar)
 Stack: Expo + TypeScript + expo-sqlite (offline-first).
 Provisional: las reglas del negocio se ajustarán tras hablar con la usuaria.

@@ -16,7 +16,7 @@
 - Recibe ticket en las compras.
 - Las compras en EE. UU. son en dólares; las de México, en pesos.
 - Al cierre del día cuenta el dinero y hace cuentas.
-
+- Cajas: sin confirmar. Decisión provisional: el stock se guarda solo en unidades. Si hacen falta cajas, se manejarán al registrar compras, no en el producto. Preguntar a la usuaria: ¿compra por caja y vende por pieza? ¿El tamaño de la caja cambia según la tienda?” Cuando puedas hacer esas dos preguntas, queda decidido con datos reales.
 ## No sé
 - Qué lleva cada producto preparado (recetas, cantidades).
 - Cuántos productos distintos maneja ni cuánto vende al día.
@@ -30,3 +30,4 @@
 - Clientes de nombre libre; pedidos separados de fiados.
 - Historial de acciones con fecha.
 - Reportes calculados a partir de ventas; empezar por un resumen diario.
+- Lectura de tickets: candidatos expo-ocr-kit, expo-mlkit-ocr y expo-ai-kit; ninguno confirmado con SDK 58. Probar en rama aparte con 3 tickets reales. Plan B: lectura en la nube (unos centavos al mes). Las fotos no se guardan.
