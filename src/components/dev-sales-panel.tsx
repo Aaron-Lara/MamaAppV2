@@ -4,6 +4,9 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
+import { DevDebtorsReport } from '@/components/dev-debtors-report';
+import { DEV_PAYMENT_CASES, isPaymentCase, type DevPaymentCaseId } from '@/components/dev-payment-cases';
+import { runPaymentCase } from '@/components/dev-payment-runs';
 import { DEV_CASES, runDevCase, type DevCaseId } from '@/components/dev-sales-cases';
 import { DevSalesReport } from '@/components/dev-sales-report';
 import { DEV_STOCK_CASES, isStockCase, runStockCase, type DevStockCaseId } from '@/components/dev-stock-cases';
@@ -21,9 +24,9 @@ const EMPTY_SUMMARY: SalesSummary = {
   recentSales: [],
 };
 
-type AnyCaseId = DevCaseId | DevStockCaseId | DevVoidCaseId;
+type AnyCaseId = DevCaseId | DevStockCaseId | DevVoidCaseId | DevPaymentCaseId;
 
-const ALL_CASES = [...DEV_CASES, ...DEV_STOCK_CASES, ...DEV_VOID_CASES];
+const ALL_CASES = [...DEV_CASES, ...DEV_STOCK_CASES, ...DEV_VOID_CASES, ...DEV_PAYMENT_CASES];
 
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : 'Error desconocido.';
@@ -35,10 +38,12 @@ export function DevSalesPanel() {
   const [summary, setSummary] = useState<SalesSummary>(EMPTY_SUMMARY);
   const [busyId, setBusyId] = useState<AnyCaseId | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = useCallback(async () => {
     try {
       setSummary(await getSalesSummary(db));
+      setRefreshKey((value) => value + 1);
     } catch (err) {
       setMessage({ ok: false, text: errorText(err) });
     }
@@ -67,7 +72,9 @@ export function DevSalesPanel() {
         ? await runStockCase(db, id)
         : isVoidCase(id)
           ? await runVoidCase(db, id)
-          : await runDevCase(db, id);
+          : isPaymentCase(id)
+            ? await runPaymentCase(db, id)
+            : await runDevCase(db, id);
       setMessage({ ok: result.ok, text: result.message });
       await refresh();
     } catch (err) {
@@ -81,6 +88,7 @@ export function DevSalesPanel() {
     <ThemedView style={styles.container}>
       <ThemedText type="smallBold">Panel de pruebas · recordSale y stock</ThemedText>
       <DevSalesReport summary={summary} />
+      <DevDebtorsReport refreshKey={refreshKey} />
 
       {ALL_CASES.map((testCase) => (
         <Pressable
