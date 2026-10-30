@@ -15,7 +15,7 @@ function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-export default function HomeScreen() {
+export default function DevScreen() {
   const db = useSQLiteContext();
   const theme = useTheme();
   const [products, setProducts] = useState<Product[]>([]);

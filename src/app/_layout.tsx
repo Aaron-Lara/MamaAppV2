@@ -1,8 +1,7 @@
 import { SQLiteProvider } from 'expo-sqlite';
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
-import AppTabs from '@/components/app-tabs';
 import { DATABASE_NAME, migrateDbIfNeeded } from '@/db/database';
 
 export default function RootLayout() {
@@ -10,7 +9,10 @@ export default function RootLayout() {
   return (
     <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AppTabs />
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="dev" options={{ title: 'Pruebas (temporal)' }} />
+        </Stack>
       </ThemeProvider>
     </SQLiteProvider>
   );
