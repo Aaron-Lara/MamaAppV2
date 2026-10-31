@@ -12,6 +12,7 @@ export default function RootLayout() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="dev" options={{ title: 'Pruebas (temporal)' }} />
+          <Stack.Screen name="product-form" options={{ title: 'Nuevo producto' }} />
         </Stack>
       </ThemeProvider>
     </SQLiteProvider>

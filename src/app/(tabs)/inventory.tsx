@@ -12,6 +12,8 @@ import { Spacing } from '@/constants/theme';
 import { useInventoryProducts } from '@/hooks/use-inventory-products';
 import { useTheme } from '@/hooks/use-theme';
 import type { InventoryFilter } from '@/lib/inventory-rules';
+import { InventoryCreateButton } from '@/components/inventory/inventory-create-button';
+
 import {
   buildInventoryRows,
   countInventoryFilters,
@@ -41,7 +43,10 @@ export default function InventoryScreen() {
       edges={['top', 'left', 'right']}
       style={[styles.safe, { backgroundColor: theme.background }]}>
       <ThemedView style={styles.container}>
-        <ThemedText type="subtitle">Inventario</ThemedText>
+        <View style={styles.header}>
+          <ThemedText type="subtitle">Inventario</ThemedText>
+          <InventoryCreateButton />
+        </View>
 
         <InventoryFilters
           query={query}
@@ -132,4 +137,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     borderRadius: 12,
   },
+  header: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+},
 });

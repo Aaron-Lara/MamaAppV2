@@ -1,98 +1,167 @@
-import { StyleSheet, Switch, TextInput, View } from 'react-native';
+// Campos del formulario de productos. No guarda nada: solo dibuja y avisa cambios.
+
+import { StyleSheet, Switch, TextInput, View, useColorScheme } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import type { ProductFormErrors, ProductFormValues, ProductFormVisibility } from '@/lib/product-form';
+import type {
+  ProductFormErrors,
+  ProductFormValues,
+  ProductFormVisibility,
+} from '@/lib/product-form';
 
 type Props = {
   values: ProductFormValues;
   errors: ProductFormErrors;
   visibility: ProductFormVisibility;
   onChange: (field: keyof ProductFormValues, value: string | boolean) => void;
+  onFieldFocus?: () => void;
 };
 
-export function ProductFormFields({ values, errors, visibility, onChange }: Props) {
-  const theme = useTheme();
+type TextFieldProps = {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  error?: string;
+  hint?: string;
+  keyboardType?: 'default' | 'decimal-pad' | 'number-pad';
+  maxLength?: number;
+  placeholder?: string;
+  onFocus?: () => void;
+};
 
-  const inputStyle = [
-    styles.input,
-    { backgroundColor: theme.backgroundElement, color: theme.text },
-  ];
-  const errorStyle = { color: '#FF3B30' };
+function useErrorColor(): string {
+  return useColorScheme() === 'dark' ? '#ff8a80' : '#c62828';
+}
+
+function TextField({
+  label,
+  value,
+  onChangeText,
+  error,
+  hint,
+  keyboardType = 'default',
+  maxLength,
+  placeholder,
+  onFocus
+}: TextFieldProps) {
+  const theme = useTheme();
+  const errorColor = useErrorColor();
+  return (
+    <View style={styles.field}>
+      <ThemedText type="smallBold">{label}</ThemedText>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        keyboardType={keyboardType}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        placeholderTextColor={theme.textSecondary}
+        accessibilityLabel={label}
+        onFocus={onFocus}
+        style={[
+          styles.input,
+          {
+            backgroundColor: theme.backgroundElement,
+            color: theme.text,
+            borderColor: error ? errorColor : 'transparent',
+          },
+        ]}
+      />
+      {hint ? (
+        <ThemedText type="small" themeColor="textSecondary">
+          {hint}
+        </ThemedText>
+      ) : null}
+      {error ? (
+        <ThemedText type="small" style={{ color: errorColor }}>
+          {error}
+        </ThemedText>
+      ) : null}
+    </View>
+  );
+}
+
+export function ProductFormFields({ values, errors, visibility, onChange, onFieldFocus }: Props) {
+  const errorColor = useErrorColor();
 
   return (
     <View style={styles.container}>
-      <ThemedText>Nombre</ThemedText>
-      <TextInput
+      <TextField
+        label="Nombre del producto"
         value={values.name}
-        onChangeText={(v) => onChange('name', v)}
-        style={inputStyle}
+        onChangeText={(text) => onChange('name', text)}
+        error={errors.name}
+        maxLength={60}
       />
-      {errors.name && <ThemedText style={errorStyle}>{errors.name}</ThemedText>}
-
-      <ThemedText>Precio</ThemedText>
-      <TextInput
+      <TextField
+        label="Precio"
         value={values.price}
-        onChangeText={(v) => onChange('price', v)}
+        onChangeText={(text) => onChange('price', text)}
+        error={errors.price}
         keyboardType="decimal-pad"
-        style={inputStyle}
+        placeholder="0.00"
+        maxLength={9}
       />
-      {errors.price && <ThemedText style={errorStyle}>{errors.price}</ThemedText>}
-
-      <ThemedText>Categoría (opcional)</ThemedText>
-      <TextInput
+      <TextField
+        label="Categoría (opcional)"
         value={values.category}
-        onChangeText={(v) => onChange('category', v)}
-        style={inputStyle}
+        onChangeText={(text) => onChange('category', text)}
+        error={errors.category}
+        maxLength={30}
       />
-      {errors.category && <ThemedText style={errorStyle}>{errors.category}</ThemedText>}
 
       <View style={styles.row}>
-        <ThemedText>Controlar stock</ThemedText>
+        <ThemedText type="smallBold">Controlar stock</ThemedText>
         <Switch
           value={values.trackStock}
-          onValueChange={(v) => onChange('trackStock', v)}
+          onValueChange={(value) => onChange('trackStock', value)}
+          accessibilityLabel="Controlar stock"
         />
       </View>
 
-      {visibility.showMinStock && (
-        <>
-          <ThemedText>Mínimo de aviso</ThemedText>
-          <TextInput
-            value={values.minStock}
-            onChangeText={(v) => onChange('minStock', v)}
-            keyboardType="number-pad"
-            style={inputStyle}
-          />
-          {errors.minStock && <ThemedText style={errorStyle}>{errors.minStock}</ThemedText>}
-        </>
-      )}
+      {visibility.showMinStock ? (
+        <TextField
+          label="Mínimo de aviso"
+          value={values.minStock}
+          onChangeText={(text) => onChange('minStock', text)}
+          error={errors.minStock}
+          keyboardType="number-pad"
+          maxLength={5}
+          onFocus={onFieldFocus}
+        />
+      ) : null}
 
-      {visibility.showStockCount && (
-        <>
-          <ThemedText>{visibility.stockCountLabel}</ThemedText>
-          <TextInput
-            value={values.stockCount}
-            onChangeText={(v) => onChange('stockCount', v)}
-            keyboardType="number-pad"
-            style={inputStyle}
-          />
-          <ThemedText type="small">Cuántas unidades hay ahora</ThemedText>
-          {errors.stockCount && <ThemedText style={errorStyle}>{errors.stockCount}</ThemedText>}
-        </>
-      )}
+      {visibility.showStockCount ? (
+        <TextField
+          label={visibility.stockCountLabel}
+          value={values.stockCount}
+          onChangeText={(text) => onChange('stockCount', text)}
+          error={errors.stockCount}
+          hint="Cuántas unidades hay ahora"
+          keyboardType="number-pad"
+          maxLength={5}
+          onFocus={onFieldFocus}
+        />
+      ) : null}
+
+      {errors.form ? <ThemedText style={{ color: errorColor }}>{errors.form}</ThemedText> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.two,
+    gap: Spacing.three,
+  },
+  field: {
+    gap: Spacing.one,
   },
   input: {
     minHeight: 48,
     borderRadius: 12,
+    borderWidth: 1,
     paddingHorizontal: Spacing.three,
   },
   row: {
