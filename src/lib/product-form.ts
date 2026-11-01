@@ -2,6 +2,11 @@
 // producto válido. No importa expo-sqlite ni nada de pantallas.
 
 import { centsToInputText, parseMoneyToCents } from '@/lib/money-input';
+import {
+  fieldForRuleError,
+  messageOf,
+  parseWholeNumber,
+} from '@/lib/product-form-helpers';
 import { validateProductInput } from '@/lib/product-input';
 
 export type ProductFormMode = 'create' | 'edit';
@@ -68,35 +73,6 @@ export function getFormVisibility(
     showStockCount: needsCount,
     stockCountLabel: mode === 'create' ? 'Stock inicial' : 'Conteo actual',
   };
-}
-
-function parseWholeNumber(text: string, label: string): number {
-  const cleaned = text.trim();
-  if (cleaned === '') {
-    return 0;
-  }
-  if (!/^\d+$/.test(cleaned)) {
-    throw new Error(`${label} debe ser un número entero, sin decimales ni signos.`);
-  }
-  const value = Number(cleaned);
-  if (!Number.isSafeInteger(value)) {
-    throw new Error(`${label} es demasiado grande.`);
-  }
-  return value;
-}
-
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : 'Revisa los datos del producto.';
-}
-
-/** Asigna un error de reglas al campo que lo menciona; si no, al formulario. */
-function fieldForRuleError(message: string): ProductFormField {
-  const text = message.toLowerCase();
-  if (text.includes('nombre')) return 'name';
-  if (text.includes('precio')) return 'price';
-  if (text.includes('categor')) return 'category';
-  if (text.includes('mínimo') || text.includes('minimo')) return 'minStock';
-  return 'form';
 }
 
 export function validateProductForm(
