@@ -1,86 +1,84 @@
-// Pantalla para crear un producto. Las pantallas no escriben SQL.
+// Ruta del formulario: sin id crea un producto; con id carga el producto y lo edita.
 
-import { router } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useRef, type ComponentRef } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet } from 'react-native';
 
-import { ProductFormFields } from '@/components/products/product-form-fields';
+import { ProductFormView } from '@/components/products/product-form-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
-import { useProductForm } from '@/hooks/use-product-form';
-import { useTheme } from '@/hooks/use-theme';
+import { getProductWithStock } from '@/db/products-get';
+import type { ProductWithStock } from '@/db/products-with-stock';
+
+type LoadState =
+  | { status: 'loading' }
+  | { status: 'missing' }
+  | { status: 'ready'; product: ProductWithStock };
 
 export default function ProductFormScreen() {
+  const { id } = useLocalSearchParams<{ id?: string }>();
   const db = useSQLiteContext();
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  const keyboardHeight = useKeyboardHeight();
-  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
-  const { values, errors, visibility, saving, onChange, save } = useProductForm('create');
+  const productId = id === undefined ? null : Number(id);
+  const [state, setState] = useState<LoadState>({ status: 'loading' });
 
-  // Los campos de abajo quedarían detrás del teclado: espera a que suba y baja al final.
-  const handleFieldFocus = useCallback(() => {
-    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
-  }, []);
+  useEffect(() => {
+    if (productId === null) {
+      return;
+    }
+    let cancelled = false;
+    getProductWithStock(db, productId)
+      .then((product) => {
+        if (!cancelled) {
+          setState(product ? { status: 'ready', product } : { status: 'missing' });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setState({ status: 'missing' });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [db, productId]);
+
+  if (productId === null) {
+    return (
+      <>
+        <Stack.Screen options={{ title: 'Nuevo producto' }} />
+        <ProductFormView mode="create" />
+      </>
+    );
+  }
+
+  if (state.status === 'ready') {
+    return (
+      <>
+        <Stack.Screen options={{ title: 'Editar producto' }} />
+        <ProductFormView mode="edit" product={state.product} />
+      </>
+    );
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: insets.bottom + 32 + keyboardHeight },
-        ]}>
-        <ProductFormFields
-          values={values}
-          errors={errors}
-          visibility={visibility}
-          onChange={onChange}
-          onFieldFocus={handleFieldFocus}
-        />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: saving, busy: saving }}
-          disabled={saving}
-          onPress={() => void save(db, () => router.back())}
-          style={({ pressed }) => [
-            styles.button,
-            { backgroundColor: theme.text },
-            (pressed || saving) && styles.dimmed,
-          ]}>
-          {saving ? (
-            <ActivityIndicator color={theme.background} />
-          ) : (
-            <ThemedText type="smallBold" style={{ color: theme.background }}>
-              Guardar
-            </ThemedText>
-          )}
-        </Pressable>
-      </ScrollView>
+    <ThemedView style={styles.centered}>
+      <Stack.Screen options={{ title: 'Editar producto' }} />
+      {state.status === 'loading' ? (
+        <ActivityIndicator size="large" accessibilityLabel="Cargando producto" />
+      ) : (
+        <ThemedText>No se encontró el producto.</ThemedText>
+      )}
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  centered: {
     flex: 1,
-  },
-  content: {
-    padding: Spacing.four,
-    gap: Spacing.four,
-  },
-  button: {
-    minHeight: 48,
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  dimmed: {
-    opacity: 0.6,
+    padding: Spacing.four,
   },
 });

@@ -1,10 +1,11 @@
-// Estado y lógica del formulario de productos (modo crear).
+// Estado y lógica del formulario de productos (crear y editar).
 // Las pantallas no escriben SQL: el guardado pasa por src/db.
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { useCallback, useRef, useState } from 'react';
 
 import { createProductWithStock } from '@/db/products-create';
+import { updateProductWithStockCount } from '@/db/products-update';
 import {
   emptyProductForm,
   getFormVisibility,
@@ -15,8 +16,23 @@ import {
 } from '@/lib/product-form';
 import { mapSaveError } from '@/lib/product-form-errors';
 
-export function useProductForm(mode: ProductFormMode = 'create', originalTrackStock = false) {
-  const [values, setValues] = useState<ProductFormValues>(emptyProductForm());
+type Options = {
+  mode: ProductFormMode;
+  productId?: number;
+  /** Solo se usa al montar: valores iniciales al editar. */
+  initialValues?: ProductFormValues;
+  originalTrackStock?: boolean;
+};
+
+export function useProductForm({
+  mode,
+  productId,
+  initialValues,
+  originalTrackStock = false,
+}: Options) {
+  const [values, setValues] = useState<ProductFormValues>(
+    () => initialValues ?? emptyProductForm()
+  );
   const [errors, setErrors] = useState<ProductFormErrors>({});
   const [saving, setSaving] = useState(false);
   // La referencia bloquea el doble toque al instante; el estado deshabilita el botón.
@@ -43,7 +59,14 @@ export function useProductForm(mode: ProductFormMode = 'create', originalTrackSt
           return;
         }
         setErrors({});
-        await createProductWithStock(db, result.input, result.stockCount ?? 0);
+        if (mode === 'edit') {
+          if (productId === undefined) {
+            throw new Error('El producto no existe.');
+          }
+          await updateProductWithStockCount(db, productId, result.input, result.stockCount);
+        } else {
+          await createProductWithStock(db, result.input, result.stockCount ?? 0);
+        }
         onSuccess();
       } catch (error) {
         setErrors(mapSaveError(error));
@@ -52,7 +75,7 @@ export function useProductForm(mode: ProductFormMode = 'create', originalTrackSt
         setSaving(false);
       }
     },
-    [mode, originalTrackStock, values]
+    [mode, originalTrackStock, productId, values]
   );
 
   return { values, errors, visibility, saving, onChange, save };

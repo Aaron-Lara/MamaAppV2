@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { InventoryFilters } from '@/components/inventory/inventory-filters';
-import { InventoryRowItem } from '@/components/inventory/inventory-row';
+import { InventoryRowLink } from '@/components/inventory/inventory-row-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -84,7 +84,7 @@ export default function InventoryScreen() {
           <FlatList
             data={visibleRows}
             keyExtractor={(row) => String(row.product.id)}
-            renderItem={({ item }) => <InventoryRowItem row={item} />}
+            renderItem={({ item }) => <InventoryRowLink row={item} />}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             style={styles.list}

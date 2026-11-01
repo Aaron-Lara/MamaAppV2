@@ -176,3 +176,45 @@ describe('validateProductForm: errores', () => {
     expect(Object.keys(result.errors).length).toBeGreaterThan(0);
   });
 });
+
+describe('validateProductForm: reactivar el control de stock al editar', () => {
+  test('exige el conteo cuando el producto no controlaba stock', () => {
+    const result = validateProductForm(
+      form({ trackStock: true, stockCount: '' }),
+      'edit',
+      false
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) throw new Error('Debía fallar');
+    expect(result.errors.stockCount).toBeDefined();
+  });
+
+  test('un conteo de 0 es válido y se envía', () => {
+    const result = validateProductForm(
+      form({ trackStock: true, stockCount: '0' }),
+      'edit',
+      false
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Debía ser válido');
+    expect(result.stockCount).toBe(0);
+  });
+
+  test('un conteo positivo se envía', () => {
+    const result = validateProductForm(
+      form({ trackStock: true, stockCount: '7' }),
+      'edit',
+      false
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Debía ser válido');
+    expect(result.stockCount).toBe(7);
+  });
+
+  test('si el control sigue apagado no se pide conteo', () => {
+    const result = validateProductForm(form({ trackStock: false }), 'edit', false);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Debía ser válido');
+    expect(result.stockCount).toBeNull();
+  });
+});

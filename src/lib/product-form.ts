@@ -132,10 +132,14 @@ export function validateProductForm(
 
   let stockCount = 0;
   if (visibility.showStockCount) {
-    try {
-      stockCount = parseWholeNumber(values.stockCount, 'La cantidad');
-    } catch (error) {
-      errors.stockCount = messageOf(error);
+    if (mode === 'edit' && values.stockCount.trim() === '') {
+      errors.stockCount = 'Escribe cuántas unidades hay ahora (puede ser 0).';
+    } else {
+      try {
+        stockCount = parseWholeNumber(values.stockCount, 'La cantidad');
+      } catch (error) {
+        errors.stockCount = messageOf(error);
+      }
     }
   }
 
@@ -151,7 +155,8 @@ export function validateProductForm(
       trackStock: values.trackStock,
       minStock,
     });
-    return { ok: true, input, stockCount: stockCount > 0 ? stockCount : null };
+    const sendsCount = visibility.showStockCount && (mode === 'edit' || stockCount > 0);
+    return { ok: true, input, stockCount: sendsCount ? stockCount : null };
   } catch (error) {
     const message = messageOf(error);
     return { ok: false, errors: { [fieldForRuleError(message)]: message } };
