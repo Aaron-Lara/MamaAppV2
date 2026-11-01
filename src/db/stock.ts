@@ -4,9 +4,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { localDateString } from '@/lib/dates';
+import { MAX_ADJUSTMENT_QUANTITY } from '@/lib/stock-adjust';
 
-/** Tope absoluto de un ajuste manual (detecta dedos resbalados). */
-export const MAX_ADJUSTMENT_QUANTITY = 10000;
+// Vive en la lógica pura para que el ajuste por conteo use el mismo tope.
+export { MAX_ADJUSTMENT_QUANTITY };
 
 /** Motivos que una persona puede registrar a mano. */
 const ADJUSTMENT_REASONS = ['purchase', 'adjustment', 'waste'] as const;
