@@ -10,6 +10,17 @@ export function localDateString(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Fecha local de hace `days` días, en formato AAAA-MM-DD.
+ * Se resta con setDate: así el calendario resuelve meses, años bisiestos y
+ * el horario de verano sin pasar por UTC.
+ */
+export function localDateStringDaysAgo(days: number, from: Date = new Date()): string {
+  const date = new Date(from.getTime());
+  date.setDate(date.getDate() - days);
+  return localDateString(date);
+}
+
 /** true solo si el texto es AAAA-MM-DD y esa fecha existe en el calendario. */
 export function isValidDateString(value: string): boolean {
   const match = DATE_PATTERN.exec(value);
