@@ -2,6 +2,7 @@
 
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
+import { ModalFooter } from '@/components/sell/modal-footer';
 import { useErrorColor } from '@/components/products/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -44,25 +45,27 @@ export function CheckoutFooter({
         </ThemedText>
       ) : null}
 
-      <Pressable
-        onPress={onConfirm}
-        disabled={blocked}
-        accessibilityRole="button"
-        accessibilityLabel="Confirmar venta"
-        accessibilityState={{ disabled: blocked, busy: saving }}
-        style={({ pressed }) => [
-          styles.button,
-          { backgroundColor: theme.text },
-          (pressed || blocked) && styles.dimmed,
-        ]}>
-        {saving ? (
-          <ActivityIndicator color={theme.background} />
-        ) : (
-          <ThemedText type="smallBold" style={{ color: theme.background }}>
-            Confirmar venta
-          </ThemedText>
-        )}
-      </Pressable>
+      <ModalFooter>
+        <Pressable
+          onPress={onConfirm}
+          disabled={blocked}
+          accessibilityRole="button"
+          accessibilityLabel="Confirmar venta"
+          accessibilityState={{ disabled: blocked, busy: saving }}
+          style={({ pressed }) => [
+            styles.button,
+            { backgroundColor: theme.text },
+            (pressed || blocked) && styles.dimmed,
+          ]}>
+          {saving ? (
+            <ActivityIndicator color={theme.background} />
+          ) : (
+            <ThemedText type="smallBold" style={{ color: theme.background }}>
+              Confirmar venta
+            </ThemedText>
+          )}
+        </Pressable>
+      </ModalFooter>
     </View>
   );
 }
