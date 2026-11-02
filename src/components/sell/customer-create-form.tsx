@@ -22,15 +22,16 @@ import { MAX_CUSTOMER_NAME_LENGTH, validateCustomerName } from '@/lib/customer-i
 import { mapCreateCustomerError } from '@/lib/customer-messages';
 
 export type CustomerCreateFormProps = {
+  initialName?: string;
   onCreated: (customer: CustomerWithBalance) => void;
   onCancel: () => void;
 };
 
-export function CustomerCreateForm({ onCreated, onCancel }: CustomerCreateFormProps) {
+export function CustomerCreateForm({ initialName, onCreated, onCancel }: CustomerCreateFormProps) {
   const db = useSQLiteContext();
   const theme = useTheme();
   const errorColor = useErrorColor();
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName ?? '');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   // La referencia bloquea el doble toque al instante; el estado deshabilita el botón.
@@ -94,25 +95,27 @@ export function CustomerCreateForm({ onCreated, onCancel }: CustomerCreateFormPr
         </ThemedText>
       ) : null}
 
-      <Pressable
-        onPress={() => void handleSave()}
-        disabled={saving}
-        accessibilityRole="button"
-        accessibilityLabel="Guardar cliente"
-        accessibilityState={{ disabled: saving, busy: saving }}
-        style={({ pressed }) => [
-          styles.save,
-          { backgroundColor: theme.text },
-          (pressed || saving) && styles.dimmed,
-        ]}>
-        {saving ? (
-          <ActivityIndicator color={theme.background} />
-        ) : (
-          <ThemedText type="smallBold" style={{ color: theme.background }}>
-            Guardar
-          </ThemedText>
-        )}
-      </Pressable>
+      <ModalFooter>
+        <Pressable
+          onPress={() => void handleSave()}
+          disabled={saving}
+          accessibilityRole="button"
+          accessibilityLabel="Guardar cliente"
+          accessibilityState={{ disabled: saving, busy: saving }}
+          style={({ pressed }) => [
+            styles.save,
+            { backgroundColor: theme.text },
+            (pressed || saving) && styles.dimmed,
+          ]}>
+          {saving ? (
+            <ActivityIndicator color={theme.background} />
+          ) : (
+            <ThemedText type="smallBold" style={{ color: theme.background }}>
+              Guardar
+            </ThemedText>
+          )}
+        </Pressable>
+      </ModalFooter>
     </View>
   );
 }
