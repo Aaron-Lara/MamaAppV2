@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { ModalFooter } from '@/components/sell/modal-footer';
 import { PickerHeader } from '@/components/sell/picker-header';
 import { useErrorColor } from '@/components/products/text-field';
 import { ThemedText } from '@/components/themed-text';

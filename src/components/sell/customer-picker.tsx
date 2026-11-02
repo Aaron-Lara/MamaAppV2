@@ -11,6 +11,7 @@ import {
 
 import { CustomerPickerStatus } from '@/components/sell/customer-picker-status';
 import { CustomerRow } from '@/components/sell/customer-row';
+import { ModalFooter } from '@/components/sell/modal-footer';
 import { PickerHeader } from '@/components/sell/picker-header';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -24,7 +25,7 @@ export type CustomerPickerProps = {
   error: string | null;
   selectedId: number | null;
   onSelect: (customer: CustomerWithBalance) => void;
-  onCreate: () => void;
+  onCreate: (name: string) => void;
   onBack: () => void;
   onRetry: () => void;
 };
@@ -41,7 +42,11 @@ export function CustomerPicker({
 }: CustomerPickerProps) {
   const theme = useTheme();
   const [query, setQuery] = useState('');
-  const filtered = customers.filter((customer) => matchesSearch(customer.name, query));
+  const trimmed = query.trim();
+  const filtered = customers.filter((customer) => matchesSearch(customer.name, trimmed));
+  // Sin resultados, el botón crea un cliente con el texto buscado.
+  const createFromSearch = trimmed !== '' && filtered.length === 0;
+  const createLabel = createFromSearch ? `Crear "${trimmed}"` : 'Crear cliente';
 
   return (
     <View style={styles.container}>
@@ -72,7 +77,7 @@ export function CustomerPicker({
           ListEmptyComponent={
             <View style={styles.centered}>
               <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
-                {query.trim() === ''
+                {trimmed === ''
                   ? 'Todavía no hay clientes.'
                   : 'No hay clientes con esa búsqueda.'}
               </ThemedText>
@@ -88,18 +93,20 @@ export function CustomerPicker({
         />
       )}
 
-      <Pressable
-        onPress={onCreate}
-        accessibilityRole="button"
-        accessibilityLabel="Crear cliente"
-        style={({ pressed }) => [
-          styles.create,
-          { backgroundColor: theme.text, opacity: pressed ? 0.7 : 1 },
-        ]}>
-        <ThemedText type="smallBold" style={{ color: theme.background }}>
-          Crear cliente
-        </ThemedText>
-      </Pressable>
+      <ModalFooter>
+        <Pressable
+          onPress={() => onCreate(createFromSearch ? trimmed : '')}
+          accessibilityRole="button"
+          accessibilityLabel={createLabel}
+          style={({ pressed }) => [
+            styles.create,
+            { backgroundColor: theme.text, opacity: pressed ? 0.7 : 1 },
+          ]}>
+          <ThemedText type="smallBold" numberOfLines={1} style={{ color: theme.background }}>
+            {createLabel}
+          </ThemedText>
+        </Pressable>
+      </ModalFooter>
     </View>
   );
 }

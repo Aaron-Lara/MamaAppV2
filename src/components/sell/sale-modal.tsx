@@ -1,15 +1,14 @@
 // Modal de cobro: efectivo o fiado, elección de cliente y confirmación.
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { CustomerCreateForm } from '@/components/sell/customer-create-form';
 import { CustomerPicker } from '@/components/sell/customer-picker';
 import { SaleCheckoutBody } from '@/components/sell/sale-checkout-body';
 import { SaleModalHeader } from '@/components/sell/sale-modal-header';
 import { Spacing } from '@/constants/theme';
-import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { useSaleCheckout } from '@/hooks/use-sale-checkout';
 import { useTheme } from '@/hooks/use-theme';
 import type { Cart } from '@/lib/cart';
@@ -35,9 +34,10 @@ export function SaleModal({
   onSaved,
 }: SaleModalProps) {
   const theme = useTheme();
-  const keyboardHeight = useKeyboardHeight();
   const checkout = useSaleCheckout({ cart, totalCents, onClose, onSaved });
   const { reload: reloadCustomers } = checkout;
+  // Nombre precargado al crear un cliente desde una búsqueda sin resultados.
+  const [draftName, setDraftName] = useState('');
 
   // Al abrir se refrescan los saldos (pueden cambiar por ventas o abonos).
   useEffect(() => {
@@ -48,51 +48,58 @@ export function SaleModal({
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={checkout.handleClose}>
-      <SafeAreaView
-        edges={['top', 'bottom', 'left', 'right']}
-        style={[styles.safe, { backgroundColor: theme.background }]}>
-        {/* El teclado empuja el contenido para que el campo quede visible. */}
-        <View style={[styles.container, { paddingBottom: keyboardHeight }]}>
-          {checkout.view === 'cart' ? (
-            <>
-              <SaleModalHeader saving={checkout.saving} onClose={checkout.handleClose} />
-              <SaleCheckoutBody
-                cart={cart}
-                totalCents={totalCents}
-                paymentMethod={checkout.paymentMethod}
-                onChangePaymentMethod={checkout.changeMethod}
-                tendered={checkout.tendered}
-                payment={checkout.payment}
-                onChangeTendered={checkout.handleTendered}
-                customer={checkout.customer}
-                onChooseCustomer={() => checkout.setView('customers')}
-                error={checkout.footerError}
-                saving={checkout.saving}
-                disabled={checkout.disabled}
-                onConfirm={checkout.handleConfirm}
-                onChangeQuantity={onChangeQuantity}
-                onRemoveLine={onRemoveLine}
+      {/* Provider propio: dentro del Modal los insets no son los de la pantalla que lo abre. */}
+      <SafeAreaProvider>
+        <SafeAreaView
+          edges={['top', 'left', 'right']}
+          style={[styles.safe, { backgroundColor: theme.background }]}>
+          {/* El teclado lo compensa el sistema con adjustResize; no se suma altura en JS. */}
+          <View style={styles.container}>
+            {checkout.view === 'cart' ? (
+              <>
+                <SaleModalHeader saving={checkout.saving} onClose={checkout.handleClose} />
+                <SaleCheckoutBody
+                  cart={cart}
+                  totalCents={totalCents}
+                  paymentMethod={checkout.paymentMethod}
+                  onChangePaymentMethod={checkout.changeMethod}
+                  tendered={checkout.tendered}
+                  payment={checkout.payment}
+                  onChangeTendered={checkout.handleTendered}
+                  customer={checkout.customer}
+                  onChooseCustomer={() => checkout.setView('customers')}
+                  error={checkout.footerError}
+                  saving={checkout.saving}
+                  disabled={checkout.disabled}
+                  onConfirm={checkout.handleConfirm}
+                  onChangeQuantity={onChangeQuantity}
+                  onRemoveLine={onRemoveLine}
+                />
+              </>
+            ) : checkout.view === 'customers' ? (
+              <CustomerPicker
+                customers={checkout.customers}
+                loading={checkout.loading}
+                error={checkout.loadError}
+                selectedId={checkout.customer?.id ?? null}
+                onSelect={checkout.handleCustomer}
+                onCreate={(name) => {
+                  setDraftName(name);
+                  checkout.setView('create');
+                }}
+                onBack={() => checkout.setView('cart')}
+                onRetry={checkout.reload}
               />
-            </>
-          ) : checkout.view === 'customers' ? (
-            <CustomerPicker
-              customers={checkout.customers}
-              loading={checkout.loading}
-              error={checkout.loadError}
-              selectedId={checkout.customer?.id ?? null}
-              onSelect={checkout.handleCustomer}
-              onCreate={() => checkout.setView('create')}
-              onBack={() => checkout.setView('cart')}
-              onRetry={checkout.reload}
-            />
-          ) : (
-            <CustomerCreateForm
-              onCreated={checkout.handleCreated}
-              onCancel={() => checkout.setView('customers')}
-            />
-          )}
-        </View>
-      </SafeAreaView>
+            ) : (
+              <CustomerCreateForm
+                initialName={draftName}
+                onCreated={checkout.handleCreated}
+                onCancel={() => checkout.setView('customers')}
+              />
+            )}
+          </View>
+        </SafeAreaView>
+      </SafeAreaProvider>
     </Modal>
   );
 }
@@ -104,6 +111,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     gap: Spacing.three,
-    padding: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.three,
   },
 });
