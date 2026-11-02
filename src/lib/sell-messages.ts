@@ -3,6 +3,7 @@
 
 export const SALE_SAVE_FALLBACK = 'No se pudo guardar la venta. Inténtalo de nuevo.';
 export const SALE_EMPTY = 'Agrega al menos un producto para cobrar.';
+export const SALE_CUSTOMER_REQUIRED = 'Elige a quién se le fía.';
 export const SALE_PAYMENT_INVALID =
   'La forma de pago no es válida. Elige efectivo e inténtalo de nuevo.';
 export const SALE_CUSTOMER_INVALID =
@@ -32,6 +33,9 @@ export function mapSaleError(error: unknown): string {
   }
   if (text.includes('forma de pago')) {
     return SALE_PAYMENT_INVALID;
+  }
+  if (text.includes('se le fía') || text.includes('elige a quién')) {
+    return SALE_CUSTOMER_REQUIRED;
   }
   if (text.includes('cliente') && text.includes('no existe')) {
     return SALE_CUSTOMER_MISSING;

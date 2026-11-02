@@ -5,16 +5,20 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import type { UndoableSale } from '@/hooks/use-undo-sale';
 import { formatCents } from '@/lib/money';
 
 export type UndoBannerProps = {
-  totalCents: number;
+  sale: UndoableSale;
   undoing: boolean;
   onUndo: () => void;
 };
 
-export function UndoBanner({ totalCents, undoing, onUndo }: UndoBannerProps) {
+export function UndoBanner({ sale, undoing, onUndo }: UndoBannerProps) {
   const theme = useTheme();
+  const label = sale.customerName
+    ? `Venta fiada a ${sale.customerName}: ${formatCents(sale.totalCents)}`
+    : `Venta guardada: ${formatCents(sale.totalCents)}`;
 
   return (
     <View style={[styles.banner, { backgroundColor: theme.backgroundElement }]}>
@@ -22,7 +26,7 @@ export function UndoBanner({ totalCents, undoing, onUndo }: UndoBannerProps) {
         type="smallBold"
         accessibilityLiveRegion="polite"
         style={styles.text}>
-        Venta guardada: {formatCents(totalCents)}
+        {label}
       </ThemedText>
 
       <Pressable

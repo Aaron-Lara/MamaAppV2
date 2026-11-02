@@ -2,6 +2,7 @@ import {
   mapSaleError,
   SALE_BUSY,
   SALE_CUSTOMER_MISSING,
+  SALE_CUSTOMER_REQUIRED,
   SALE_EMPTY,
   SALE_NO_SPACE,
   SALE_PAYMENT_INVALID,
@@ -9,7 +10,7 @@ import {
   SALE_PRODUCT_MISSING,
   SALE_QUANTITY_INVALID,
   SALE_SAVE_FALLBACK,
-} from './sell-messages';
+} from '../sell-messages';
 
 describe('mapSaleError', () => {
   it('traduce una venta sin productos', () => {
@@ -18,6 +19,10 @@ describe('mapSaleError', () => {
 
   it('traduce una forma de pago inválida', () => {
     expect(mapSaleError(new Error('La forma de pago no es válida.'))).toBe(SALE_PAYMENT_INVALID);
+  });
+
+  it('pide elegir cliente en una venta fiada', () => {
+    expect(mapSaleError(new Error('Elige a quién se le fía.'))).toBe(SALE_CUSTOMER_REQUIRED);
   });
 
   it('traduce un cliente que ya no existe', () => {

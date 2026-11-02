@@ -10,6 +10,7 @@ import { formatCents } from '@/lib/money';
 
 export type CheckoutFooterProps = {
   totalCents: number;
+  totalLabel?: string;
   error: string | null;
   saving: boolean;
   disabled: boolean;
@@ -18,6 +19,7 @@ export type CheckoutFooterProps = {
 
 export function CheckoutFooter({
   totalCents,
+  totalLabel = 'Total',
   error,
   saving,
   disabled,
@@ -31,7 +33,7 @@ export function CheckoutFooter({
     <View style={styles.container}>
       <View style={styles.totalRow}>
         <ThemedText type="small" themeColor="textSecondary">
-          Total
+          {totalLabel}
         </ThemedText>
         <ThemedText type="subtitle">{formatCents(totalCents)}</ThemedText>
       </View>

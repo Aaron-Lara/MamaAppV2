@@ -12,7 +12,11 @@ import { formatCents } from '@/lib/money';
 export const UNDO_WINDOW_MS = 10_000;
 export const UNDO_REASON = 'Se deshizo la venta recién cobrada.';
 
-export type UndoableSale = { saleId: number; totalCents: number };
+export type UndoableSale = {
+  saleId: number;
+  totalCents: number;
+  customerName: string | null;
+};
 
 type Options = { onVoided?: () => void };
 
@@ -22,7 +26,7 @@ function undoErrorMessage(error: unknown): string {
     return 'Esa venta ya no se puede deshacer.';
   }
   if (text.includes('abonos')) {
-    return 'Primero anula los abonos de ese cliente.';
+    return 'No se puede deshacer: ese cliente ya tiene abonos.';
   }
   return 'No se pudo deshacer la venta. Inténtalo de nuevo.';
 }

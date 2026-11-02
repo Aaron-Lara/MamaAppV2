@@ -104,7 +104,7 @@ export default function SellScreen() {
 
         {undo.sale ? (
           <UndoBanner
-            totalCents={undo.sale.totalCents}
+            sale={undo.sale}
             undoing={undo.undoing}
             onUndo={undo.undo}
           />
