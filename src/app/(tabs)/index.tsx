@@ -9,12 +9,14 @@ import { SaleModal } from '@/components/sell/sale-modal';
 import { SellBody } from '@/components/sell/sell-body';
 import { SellFilters } from '@/components/sell/sell-filters';
 import { SellGrid } from '@/components/sell/sell-grid';
+import { UndoBanner } from '@/components/sell/undo-banner';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useSaleCart } from '@/hooks/use-sale-cart';
 import { useSellableProducts } from '@/hooks/use-sellable-products';
 import { useTheme } from '@/hooks/use-theme';
+import { useUndoSale } from '@/hooks/use-undo-sale';
 import { buildSellRows } from '@/lib/sell-grid-rows';
 import { listCategories, selectSellable, splitFrequent } from '@/lib/sellable-order';
 import { toCartProduct } from '@/lib/sellable-product';
@@ -23,6 +25,7 @@ export default function SellScreen() {
   const theme = useTheme();
   const { products, frequency, loading, error, reload } = useSellableProducts();
   const cart = useSaleCart();
+  const undo = useUndoSale({ onVoided: reload });
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -99,6 +102,14 @@ export default function SellScreen() {
           />
         </SellBody>
 
+        {undo.sale ? (
+          <UndoBanner
+            totalCents={undo.sale.totalCents}
+            undoing={undo.undoing}
+            onUndo={undo.undo}
+          />
+        ) : null}
+
         <CartBar
           unitCount={cart.unitCount}
           totalCents={cart.totalCents}
@@ -114,6 +125,12 @@ export default function SellScreen() {
         onClose={() => setCheckoutOpen(false)}
         onChangeQuantity={cart.changeQuantity}
         onRemoveLine={cart.removeLine}
+        onSaved={(sale) => {
+          cart.clear();
+          setCheckoutOpen(false);
+          undo.start(sale);
+          void reload();
+        }}
       />
     </SafeAreaView>
   );
