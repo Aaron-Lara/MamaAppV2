@@ -1,5 +1,6 @@
 // Pestaña de Fiados: clientes con deuda, búsqueda, filtros y alta rápida.
 
+import { router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -85,7 +86,7 @@ export default function DebtsScreen() {
             <FlatList
               data={visibleRows}
               keyExtractor={(row) => String(row.id)}
-              renderItem={({ item }) => <DebtorRow row={item} />}
+              renderItem={({ item }) => <DebtorRow row={item} onPress={() => router.push({ pathname: '/customer-detail', params: { id: String(item.id) } })} />}
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
               style={styles.list}
