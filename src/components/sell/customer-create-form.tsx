@@ -25,22 +25,20 @@ export type CustomerCreateFormProps = {
   initialName?: string;
   onCreated: (customer: CustomerWithBalance) => void;
   onCancel: () => void;
+  footer?: React.ReactNode;
 };
 
-export function CustomerCreateForm({ initialName, onCreated, onCancel }: CustomerCreateFormProps) {
+export function CustomerCreateForm({ initialName, onCreated, onCancel, footer }: CustomerCreateFormProps) {
   const db = useSQLiteContext();
   const theme = useTheme();
   const errorColor = useErrorColor();
   const [name, setName] = useState(initialName ?? '');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  // La referencia bloquea el doble toque al instante; el estado deshabilita el botón.
   const savingRef = useRef(false);
 
   const handleSave = useCallback(async () => {
-    if (savingRef.current) {
-      return;
-    }
+    if (savingRef.current) return;
     savingRef.current = true;
     setSaving(true);
     setError(null);
@@ -56,66 +54,38 @@ export function CustomerCreateForm({ initialName, onCreated, onCancel }: Custome
     }
   }, [db, name, onCreated]);
 
+  const defaultFooter = (
+    <ModalFooter>
+      <Pressable
+        onPress={() => void handleSave()}
+        disabled={saving}
+        style={({ pressed }) => [
+          styles.save,
+          { backgroundColor: theme.text },
+          (pressed || saving) && styles.dimmed,
+        ]}>
+        {saving ? <ActivityIndicator color={theme.background} /> : <ThemedText type="smallBold" style={{ color: theme.background }}>Guardar</ThemedText>}
+      </Pressable>
+    </ModalFooter>
+  );
+
   return (
     <View style={styles.container}>
-      <PickerHeader
-        title="Nuevo cliente"
-        backLabel="Volver"
-        onBack={onCancel}
-        disabled={saving}
-      />
-
+      <PickerHeader title="Nuevo cliente" backLabel="Volver" onBack={onCancel} disabled={saving} />
       <View style={styles.field}>
         <ThemedText type="smallBold">Nombre del cliente</ThemedText>
         <TextInput
           value={name}
-          onChangeText={(text) => {
-            setName(text);
-            setError(null);
-          }}
+          onChangeText={(text) => { setName(text); setError(null); }}
           placeholder="Nombre"
           placeholderTextColor={theme.textSecondary}
-          accessibilityLabel="Nombre del cliente"
           maxLength={MAX_CUSTOMER_NAME_LENGTH}
           editable={!saving}
-          style={[
-            styles.input,
-            {
-              backgroundColor: theme.backgroundElement,
-              color: theme.text,
-              borderColor: error ? errorColor : 'transparent',
-            },
-          ]}
+          style={[styles.input, { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: error ? errorColor : 'transparent' }]}
         />
       </View>
-
-      {error ? (
-        <ThemedText type="small" accessibilityLiveRegion="polite" style={{ color: errorColor }}>
-          {error}
-        </ThemedText>
-      ) : null}
-
-      <ModalFooter>
-        <Pressable
-          onPress={() => void handleSave()}
-          disabled={saving}
-          accessibilityRole="button"
-          accessibilityLabel="Guardar cliente"
-          accessibilityState={{ disabled: saving, busy: saving }}
-          style={({ pressed }) => [
-            styles.save,
-            { backgroundColor: theme.text },
-            (pressed || saving) && styles.dimmed,
-          ]}>
-          {saving ? (
-            <ActivityIndicator color={theme.background} />
-          ) : (
-            <ThemedText type="smallBold" style={{ color: theme.background }}>
-              Guardar
-            </ThemedText>
-          )}
-        </Pressable>
-      </ModalFooter>
+      {error ? <ThemedText type="small" style={{ color: errorColor }}>{error}</ThemedText> : null}
+      {footer ?? defaultFooter}
     </View>
   );
 }
