@@ -1,7 +1,7 @@
 // Alta rápida de cliente desde el cobro fiado.
 
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type ComponentType } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,14 +21,27 @@ import { useTheme } from '@/hooks/use-theme';
 import { MAX_CUSTOMER_NAME_LENGTH, validateCustomerName } from '@/lib/customer-input';
 import { mapCreateCustomerError } from '@/lib/customer-messages';
 
+export type CustomerCreateFormFooterControls = {
+  save: () => void;
+  saving: boolean;
+};
+
 export type CustomerCreateFormProps = {
   initialName?: string;
   onCreated: (customer: CustomerWithBalance) => void;
   onCancel: () => void;
-  footer?: React.ReactNode;
+  onFieldFocus?: () => void;
+  // El pie es configurable: Vender usa ModalFooter y Fiados uno normal.
+  footer?: ComponentType<CustomerCreateFormFooterControls>;
 };
 
-export function CustomerCreateForm({ initialName, onCreated, onCancel, footer }: CustomerCreateFormProps) {
+export function CustomerCreateForm({
+  initialName,
+  onCreated,
+  onCancel,
+  onFieldFocus,
+  footer,
+}: CustomerCreateFormProps) {
   const db = useSQLiteContext();
   const theme = useTheme();
   const errorColor = useErrorColor();
@@ -54,10 +67,15 @@ export function CustomerCreateForm({ initialName, onCreated, onCancel, footer }:
     }
   }, [db, name, onCreated]);
 
+  const save = useCallback(() => {
+    void handleSave();
+  }, [handleSave]);
+  const Footer = footer;
+
   const defaultFooter = (
     <ModalFooter>
       <Pressable
-        onPress={() => void handleSave()}
+        onPress={save}
         disabled={saving}
         style={({ pressed }) => [
           styles.save,
@@ -81,11 +99,12 @@ export function CustomerCreateForm({ initialName, onCreated, onCancel, footer }:
           placeholderTextColor={theme.textSecondary}
           maxLength={MAX_CUSTOMER_NAME_LENGTH}
           editable={!saving}
+          onFocus={onFieldFocus}
           style={[styles.input, { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: error ? errorColor : 'transparent' }]}
         />
       </View>
       {error ? <ThemedText type="small" style={{ color: errorColor }}>{error}</ThemedText> : null}
-      {footer ?? defaultFooter}
+      {Footer ? <Footer save={save} saving={saving} /> : defaultFooter}
     </View>
   );
 }

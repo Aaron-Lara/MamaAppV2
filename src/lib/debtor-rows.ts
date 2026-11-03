@@ -1,8 +1,18 @@
+import type { Debtor } from '@/db/balances';
 import { CustomerWithBalance } from '@/db/customers-list';
 import type { DebtInput } from '@/db/customer-ledger';
 import { calculateDebtAge, DebtAgeStatus } from './debt-age';
 
 export type { DebtInput } from '@/db/customer-ledger';
+
+/** Convierte un deudor de balances.ts al formato de cliente con saldo. */
+export function toCustomerWithBalance(debtor: Debtor): CustomerWithBalance {
+  return {
+    id: debtor.customerId,
+    name: debtor.name,
+    balanceCents: debtor.balanceCents,
+  };
+}
 
 export type DebtorRow = {
   id: number;

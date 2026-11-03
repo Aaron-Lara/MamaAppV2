@@ -1,32 +1,64 @@
+// Carga de clientes con su deuda y antigüedad para la pestaña de Fiados.
+
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useRef, useState } from 'react';
-import { listDebtors } from '@/db/balances';
-import { listCustomersWithBalance, CustomerWithBalance } from '@/db/customers-list';
-import { listDebtAgeInputs, DebtInput } from '@/db/customer-ledger';
-import { buildDebtorRows, DebtorRow } from '@/lib/debtor-rows';
-import { localDateString } from '@/lib/dates';
 
-export function useDebtors(filter: 'debt' | 'all') {
+import { listDebtors } from '@/db/balances';
+import { listCustomersWithBalance } from '@/db/customers-list';
+import { listDebtAgeInputs } from '@/db/customer-ledger';
+import { localDateString } from '@/lib/dates';
+import { buildDebtorRows, toCustomerWithBalance, type DebtorRow } from '@/lib/debtor-rows';
+
+export type DebtFilter = 'debt' | 'all';
+
+export type DebtorsData = {
+  rows: DebtorRow[];
+  loading: boolean;
+  error: string | null;
+};
+
+const LOAD_ERROR = 'No se pudieron cargar los datos.';
+
+export function useDebtors(filter: DebtFilter) {
   const db = useSQLiteContext();
-  const [data, setData] = useState<{ rows: DebtorRow[], loading: boolean, error: string | null }>({ rows: [], loading: true, error: null });
+  const [data, setData] = useState<DebtorsData>({ rows: [], loading: true, error: null });
   const requestId = useRef(0);
 
   const reload = useCallback(async () => {
     const request = ++requestId.current;
-    if (request === 1) setData(prev => ({ ...prev, loading: true }));
+    // Solo se muestra el indicador en la primera carga de la pantalla.
+    if (request === 1) {
+      setData((previous) => ({ ...previous, loading: true }));
+    }
     try {
       const [customers, debtInputs] = await Promise.all([
-        filter === 'debt' ? listDebtors(db).then(d => d.map(x => ({ ...x, balanceCents: x.balanceCents }))) : listCustomersWithBalance(db),
+        filter === 'debt'
+          ? listDebtors(db).then((debtors) => debtors.map(toCustomerWithBalance))
+          : listCustomersWithBalance(db),
         listDebtAgeInputs(db),
       ]);
-      if (request !== requestId.current) return;
-      setData({ rows: buildDebtorRows(customers as CustomerWithBalance[], debtInputs as DebtInput, localDateString()), loading: false, error: null });
+      if (request !== requestId.current) {
+        return;
+      }
+      setData({
+        rows: buildDebtorRows(customers, debtInputs, localDateString()),
+        loading: false,
+        error: null,
+      });
     } catch {
-      if (request === requestId.current) setData({ rows: [], loading: false, error: 'No se pudieron cargar los datos.' });
+      if (request === requestId.current) {
+        setData({ rows: [], loading: false, error: LOAD_ERROR });
+      }
     }
   }, [db, filter]);
 
-  useFocusEffect(useCallback(() => { void reload(); }, [reload]));
+  // NativeTabs deja la pantalla montada: se recarga cada vez que recibe foco.
+  useFocusEffect(
+    useCallback(() => {
+      void reload();
+    }, [reload])
+  );
+
   return { ...data, reload };
 }

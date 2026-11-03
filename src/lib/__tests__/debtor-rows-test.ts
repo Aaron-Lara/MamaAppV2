@@ -1,14 +1,18 @@
-import { buildDebtorRows, totalOwedCents } from '../debtor-rows';
-import { CustomerWithBalance } from '../../db/customers-list';
+import type { CustomerWithBalance } from '../../db/customers-list';
+import {
+  buildDebtorRows,
+  toCustomerWithBalance,
+  totalOwedCents,
+} from '../debtor-rows';
 
-describe('debtor-rows', () => {
-  const mockCustomers: CustomerWithBalance[] = [
+describe('buildDebtorRows', () => {
+  const clientes: CustomerWithBalance[] = [
     { id: 1, name: 'B', balanceCents: 100 },
     { id: 2, name: 'A', balanceCents: 200 },
     { id: 3, name: 'C', balanceCents: 0 },
   ];
 
-  const mockDebtInputs = {
+  const deudas = {
     sales: [
       { customerId: 1, saleDate: '2026-01-01', totalCents: 100 },
       { customerId: 2, saleDate: '2026-01-02', totalCents: 200 },
@@ -16,22 +20,52 @@ describe('debtor-rows', () => {
     payments: [],
   };
 
-  it('builds rows with correct sorting and age text', () => {
-    const rows = buildDebtorRows(mockCustomers, mockDebtInputs, '2026-01-05');
-    
-    // Sort: B (200), A (100) -> Wait, B has 100, A has 200. A should be first.
-    // B: 100, A: 200. My sorting logic: `b.balanceCents - a.balanceCents`.
-    // Wait, mockCustomers: A is id: 2, balance 200. B is id: 1, balance 100.
-    // Correct order: 2, 1, 3.
-    expect(rows[0].id).toBe(2);
-    expect(rows[1].id).toBe(1);
-    expect(rows[2].id).toBe(3);
-    
+  test('ordena por saldo y calcula la antigüedad', () => {
+    const rows = buildDebtorRows(clientes, deudas, '2026-01-05');
+
+    // A debe 200, B debe 100 y C no debe nada.
+    expect(rows.map((row) => row.id)).toEqual([2, 1, 3]);
     expect(rows[0].ageText).toBe('hace 3 días');
+    expect(rows[1].ageText).toBe('hace 4 días');
     expect(rows[2].ageText).toBe('');
   });
 
-  it('calculates total owed', () => {
-    expect(totalOwedCents(mockCustomers)).toBe(300);
+  test('convierte deudores y calcula la antigüedad del filtro Con deuda', () => {
+    // listDebtors devuelve customerId; si se usa tal cual, id queda undefined
+    // y buildDebtorRows no encuentra las ventas ni calcula la antigüedad.
+    const deudores = [{ customerId: 10, name: 'Ana', balanceCents: 100 }];
+    const clientesConDeuda = deudores.map(toCustomerWithBalance);
+
+    const rows = buildDebtorRows(
+      clientesConDeuda,
+      {
+        sales: [{ customerId: 10, saleDate: '2026-01-01', totalCents: 100 }],
+        payments: [],
+      },
+      '2026-01-10'
+    );
+
+    expect(rows[0]).toMatchObject({
+      id: 10,
+      name: 'Ana',
+      balanceCents: 100,
+      daysOld: 9,
+      status: 'warning',
+      isOverdue: true,
+      ageText: 'hace 9 días',
+    });
+  });
+});
+
+describe('totalOwedCents', () => {
+  test('suma solo los saldos que se deben', () => {
+    const clientes: CustomerWithBalance[] = [
+      { id: 1, name: 'Ana', balanceCents: 250 },
+      { id: 2, name: 'Luis', balanceCents: 50 },
+      { id: 3, name: 'Eva', balanceCents: 0 },
+      { id: 4, name: 'Saldo a favor', balanceCents: -30 },
+    ];
+
+    expect(totalOwedCents(clientes)).toBe(300);
   });
 });
