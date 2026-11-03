@@ -1,7 +1,8 @@
 // Traduce errores al crear un cliente sin mostrar texto técnico.
 
-import { DUPLICATE_CUSTOMER_MESSAGE } from '@/db/customers-create';
 import { MAX_CUSTOMER_NAME_LENGTH } from '@/lib/customer-input';
+
+export const DUPLICATE_CUSTOMER_MESSAGE = 'Ya existe un cliente con ese nombre.';
 
 export const CUSTOMER_SAVE_ERROR = 'No se pudo crear el cliente. Inténtalo de nuevo.';
 

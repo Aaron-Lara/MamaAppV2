@@ -3,9 +3,11 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { DUPLICATE_CUSTOMER_MESSAGE } from '@/lib/customer-messages';
 import { hasDuplicateCustomerName, validateCustomerName } from '@/lib/customer-input';
 
-export const DUPLICATE_CUSTOMER_MESSAGE = 'Ya existe un cliente con ese nombre.';
+// Se reexporta para conservar el nombre público que ya usaban otros módulos.
+export { DUPLICATE_CUSTOMER_MESSAGE };
 
 type NameRow = { name: string };
 
