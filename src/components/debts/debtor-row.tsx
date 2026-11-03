@@ -2,13 +2,15 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { DebtorRow as DebtorRowType } from '@/lib/debtor-rows';
+import { useStatusColors } from '@/hooks/use-status-colors';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCents } from '@/lib/money';
 
 export function DebtorRow({ row }: { row: DebtorRowType }) {
   const theme = useTheme();
+  const statusColors = useStatusColors();
   const isAtrasado = row.isOverdue;
-  const statusColor = row.status === 'danger' ? theme.error : theme.warning;
+  const statusColor = row.status === 'danger' ? statusColors.error : statusColors.warning;
 
   return (
     <View style={[styles.row, { backgroundColor: theme.backgroundElement }]}>
