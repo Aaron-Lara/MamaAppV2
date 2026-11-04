@@ -48,6 +48,7 @@ describe('buildDaySaleRows', () => {
 
   test('arma hora local, total y forma de pago', () => {
     const rows = buildDaySaleRows(ventas, OFFSET);
+    expect(rows[0].totalCents).toBe(4500);
     expect(rows[0].timeLabel).toBe('17:05');
     expect(rows[0].totalLabel).toBe('$45.00');
     expect(rows[0].paymentLabel).toBe('Efectivo');

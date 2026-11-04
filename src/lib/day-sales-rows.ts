@@ -7,6 +7,7 @@ import { formatSaleItemsText } from '@/lib/sale-items-formatter';
 
 export type DaySaleRow = {
   id: number;
+  totalCents: number;
   timeLabel: string;
   totalLabel: string;
   paymentLabel: string;
@@ -26,6 +27,7 @@ export function buildDaySaleRows(
 ): DaySaleRow[] {
   return sales.map((sale) => ({
     id: sale.id,
+    totalCents: sale.totalCents,
     timeLabel: formatLocalTime(sale.createdAt, utcOffsetMinutes),
     totalLabel: formatCents(sale.totalCents),
     paymentLabel: sale.paymentMethod === 'credit' ? 'Fiado' : 'Efectivo',

@@ -12,6 +12,7 @@ import { localDateString } from '@/lib/dates';
 export type DayNavigation = {
   date: string;
   label: string;
+  isToday: boolean;
   canGoNext: boolean;
   goPrev: () => void;
   goNext: () => void;
@@ -41,6 +42,7 @@ export function useDayNavigation(): DayNavigation {
     () => ({
       date,
       label: dayLabel(date, today),
+      isToday: date === today,
       canGoNext: canGoNextDay(date, today),
       goPrev,
       goNext,

@@ -8,6 +8,10 @@ import { Alert } from 'react-native';
 
 import { voidSale } from '@/db/sales-void';
 import { formatCents } from '@/lib/money';
+import {
+  translateVoidSaleError,
+  UNDO_SALE_TEXTS,
+} from '@/lib/sale-void-messages';
 
 export const UNDO_WINDOW_MS = 10_000;
 export const UNDO_REASON = 'Se deshizo la venta recién cobrada.';
@@ -19,17 +23,6 @@ export type UndoableSale = {
 };
 
 type Options = { onVoided?: () => void };
-
-function undoErrorMessage(error: unknown): string {
-  const text = error instanceof Error ? error.message.toLowerCase() : '';
-  if (text.includes('ya está anulada') || text.includes('no existe')) {
-    return 'Esa venta ya no se puede deshacer.';
-  }
-  if (text.includes('abonos')) {
-    return 'No se puede deshacer: ese cliente ya tiene abonos.';
-  }
-  return 'No se pudo deshacer la venta. Inténtalo de nuevo.';
-}
 
 export function useUndoSale({ onVoided }: Options = {}) {
   const db = useSQLiteContext();
@@ -71,7 +64,7 @@ export function useUndoSale({ onVoided }: Options = {}) {
         setSale(null);
         onVoided?.();
       } catch (caught) {
-        Alert.alert('No se pudo deshacer la venta', undoErrorMessage(caught), [
+        Alert.alert('No se pudo deshacer la venta', translateVoidSaleError(caught, UNDO_SALE_TEXTS), [
           { text: 'Entendido' },
         ]);
       } finally {
