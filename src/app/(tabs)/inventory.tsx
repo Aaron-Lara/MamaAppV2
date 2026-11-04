@@ -5,6 +5,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { InventoryFilters } from '@/components/inventory/inventory-filters';
+import { InventoryHeader } from '@/components/inventory/inventory-header';
 import { InventoryRowLink } from '@/components/inventory/inventory-row-link';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -12,7 +13,6 @@ import { Spacing } from '@/constants/theme';
 import { useInventoryProducts } from '@/hooks/use-inventory-products';
 import { useTheme } from '@/hooks/use-theme';
 import type { InventoryFilter } from '@/lib/inventory-rules';
-import { InventoryCreateButton } from '@/components/inventory/inventory-create-button';
 
 import {
   buildInventoryRows,
@@ -43,10 +43,7 @@ export default function InventoryScreen() {
       edges={['top', 'left', 'right']}
       style={[styles.safe, { backgroundColor: theme.background }]}>
       <ThemedView style={styles.container}>
-        <View style={styles.header}>
-          <ThemedText type="subtitle">Inventario</ThemedText>
-          <InventoryCreateButton />
-        </View>
+        <InventoryHeader />
 
         <InventoryFilters
           query={query}
@@ -137,9 +134,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     borderRadius: 12,
   },
-  header: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-},
 });
