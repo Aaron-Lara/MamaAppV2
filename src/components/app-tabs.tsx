@@ -24,12 +24,9 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>Fiados</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.2" md="group" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="home">
-        <NativeTabs.Trigger.Label>Inicio</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
+      <NativeTabs.Trigger name="summary">
+        <NativeTabs.Trigger.Label>Resumen</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="chart.bar" md="bar_chart" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
