@@ -43,6 +43,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - Los reportes, saldos y totales solo cuentan ventas con status = 'active'.
 - Anular una venta nunca la borra: marca status = 'void' y compensa el stock con movimientos 'void'.
 - Las fotos de tickets no se guardan: se procesan, se borra el archivo temporal y nunca se guarda su ruta. El proceso de lectura no debe bloquear ventas.
+- En stock_movements, el reference_id mezcla ids de ventas y compras: toda consulta por reference_id debe incluir también reason. La anulación de una compra compensa con reason 'purchase' y cantidad negativa, nunca con 'void'.
 - Los colores, espacios y tamaños de letra salen de src/constants/theme.ts y del hook useTheme
 
 ## Proyecto: app POS e inventario (cooperativa escolar)
