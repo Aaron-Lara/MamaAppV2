@@ -3,6 +3,7 @@
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { DaySelector } from '@/components/summary/day-selector';
+import { ProfitEstimateCard } from '@/components/summary/profit-estimate-card';
 import { RetryBlock } from '@/components/summary/retry-block';
 import { StockReviewSection } from '@/components/summary/stock-review';
 import { SummaryCards } from '@/components/summary/summary-cards';
@@ -11,6 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { DaySummary } from '@/db/day-summary';
+import type { ProfitEstimate } from '@/lib/profit-estimate';
 
 type Props = {
   label: string;
@@ -21,6 +23,10 @@ type Props = {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
+  profit: ProfitEstimate | null;
+  profitLoading: boolean;
+  profitError: string | null;
+  onRetryProfit: () => void;
 };
 
 export function SummaryHeader({
@@ -32,6 +38,10 @@ export function SummaryHeader({
   loading,
   error,
   onRetry,
+  profit,
+  profitLoading,
+  profitError,
+  onRetryProfit,
 }: Props) {
   const theme = useTheme();
 
@@ -55,6 +65,12 @@ export function SummaryHeader({
       {summary ? (
         <>
           <SummaryCards summary={summary} />
+          <ProfitEstimateCard
+            profit={profit}
+            loading={profitLoading}
+            error={profitError}
+            onRetry={onRetryProfit}
+          />
           <TopProducts products={summary.topProducts} />
           <StockReviewSection review={summary.stockReview} />
         </>

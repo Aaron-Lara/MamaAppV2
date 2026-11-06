@@ -7,21 +7,16 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { DaySaleRow } from '@/components/summary/day-sale-row';
 import { RetryBlock } from '@/components/summary/retry-block';
-import { SummaryHeader } from '@/components/summary/summary-header';
+import { SummaryListHeader } from '@/components/summary/summary-list-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useDayNavigation } from '@/hooks/use-day-navigation';
+import { useDayProfit } from '@/hooks/use-day-profit';
 import { useDaySales } from '@/hooks/use-day-sales';
 import { useDaySummary } from '@/hooks/use-day-summary';
 import { useTheme } from '@/hooks/use-theme';
 import { useVoidDaySale } from '@/hooks/use-void-day-sale';
-
-function salesCountLabel(active: number, voided: number): string {
-  const sales = active === 1 ? '1 venta' : `${active} ventas`;
-  const voidedSales = voided === 1 ? '1 anulada' : `${voided} anuladas`;
-  return `${sales} · ${voidedSales}`;
-}
 
 export default function SummaryScreen() {
   const theme = useTheme();
@@ -34,6 +29,12 @@ export default function SummaryScreen() {
     reload: reloadSummary,
   } = useDaySummary(date);
   const {
+    profit,
+    loading: profitLoading,
+    error: profitError,
+    reload: reloadProfit,
+  } = useDayProfit(date);
+  const {
     rows,
     loading: salesLoading,
     error: salesError,
@@ -43,7 +44,8 @@ export default function SummaryScreen() {
   const handleVoided = useCallback(() => {
     void reloadSummary();
     void reloadSales();
-  }, [reloadSummary, reloadSales]);
+    void reloadProfit();
+  }, [reloadSummary, reloadSales, reloadProfit]);
 
   const { voidingId, requestVoid } = useVoidDaySale({
     isOtherDay: !isToday,
@@ -54,24 +56,22 @@ export default function SummaryScreen() {
   const voidedCount = summary?.voidedSalesCount ?? rows.filter((row) => row.isVoid).length;
 
   const header = (
-    <View style={styles.header}>
-      <SummaryHeader
-        label={label}
-        canGoNext={canGoNext}
-        onPrev={goPrev}
-        onNext={goNext}
-        summary={summary}
-        loading={summaryLoading}
-        error={summaryError}
-        onRetry={() => void reloadSummary()}
-      />
-      <View style={styles.salesHeader}>
-        <ThemedText type="smallBold">Ventas del día</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {salesCountLabel(activeCount, voidedCount)}
-        </ThemedText>
-      </View>
-    </View>
+    <SummaryListHeader
+      label={label}
+      canGoNext={canGoNext}
+      onPrev={goPrev}
+      onNext={goNext}
+      summary={summary}
+      summaryLoading={summaryLoading}
+      summaryError={summaryError}
+      onRetrySummary={() => void reloadSummary()}
+      profit={profit}
+      profitLoading={profitLoading}
+      profitError={profitError}
+      onRetryProfit={() => void reloadProfit()}
+      activeCount={activeCount}
+      voidedCount={voidedCount}
+    />
   );
 
   return (
@@ -133,12 +133,6 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: Spacing.three,
-  },
-  header: {
-    gap: Spacing.three,
-  },
-  salesHeader: {
-    gap: Spacing.half,
   },
   centered: {
     alignItems: 'center',
