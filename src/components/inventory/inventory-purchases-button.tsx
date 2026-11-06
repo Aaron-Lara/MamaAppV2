@@ -1,4 +1,4 @@
-// Botón para abrir el formulario de compras desde Inventario.
+// Botón para abrir la lista de compras desde Inventario.
 
 import { router, type Href } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
@@ -13,7 +13,7 @@ export function InventoryPurchasesButton() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Compras"
-      onPress={() => router.push('/purchase-form' as Href)}
+      onPress={() => router.push('/purchases' as Href)}
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: theme.backgroundElement },
