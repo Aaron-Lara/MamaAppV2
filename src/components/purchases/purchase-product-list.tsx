@@ -1,4 +1,4 @@
-// Lista buscable de productos activos para un renglón de compra.
+// Lista buscable de productos activos para una compra.
 
 import {
   ActivityIndicator,
@@ -54,7 +54,9 @@ export function PurchaseProductList({
           data={filtered}
           keyExtractor={(item) => String(item.id)}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           style={styles.list}
+          contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <Pressable
               onPress={() => onSelect(null)}
@@ -100,8 +102,9 @@ export function PurchaseProductList({
 }
 
 const styles = StyleSheet.create({
-  container: { gap: Spacing.two },
-  list: { flexGrow: 0 },
+  container: { flex: 1, minHeight: 0, gap: Spacing.two },
+  list: { flex: 1 },
+  listContent: { paddingBottom: Spacing.four },
   option: {
     minHeight: 48,
     justifyContent: 'center',

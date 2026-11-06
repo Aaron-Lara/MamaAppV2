@@ -1,4 +1,4 @@
-// Tarjeta de un renglón de compra: producto, descripción, unidades y costo.
+// Tarjeta de un producto de compra: descripción, unidades y costo.
 
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -54,12 +54,12 @@ export function PurchaseLineCard({
   return (
     <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
       <View style={styles.header}>
-        <ThemedText type="smallBold">Renglón {index + 1}</ThemedText>
+        <ThemedText type="smallBold">Producto {index + 1}</ThemedText>
         <Pressable
           onPress={onRemove}
           disabled={!canRemove}
           accessibilityRole="button"
-          accessibilityLabel={`Quitar renglón ${index + 1}`}
+          accessibilityLabel={`Quitar producto ${index + 1}`}
           accessibilityState={{ disabled: !canRemove }}
           style={({ pressed }) => [
             styles.remove,
@@ -109,7 +109,7 @@ export function PurchaseLineCard({
         onFocus={onFocusLast}
       />
       <TextField
-        label={`Costo total del renglón (${currency})`}
+        label={`Costo total (${currency})`}
         value={line.cost}
         onChangeText={(cost) => onChange({ cost })}
         error={errors?.cost}
@@ -119,8 +119,8 @@ export function PurchaseLineCard({
       />
       <ThemedText type="small" themeColor="textSecondary">
         {unitCost == null
-          ? 'Costo por unidad: —'
-          : `Costo por unidad: ${formatCents(unitCost)}`}
+          ? 'Costo de cada unidad: —'
+          : `Costo de cada unidad: ${formatCents(unitCost)}`}
       </ThemedText>
     </View>
   );

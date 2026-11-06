@@ -1,11 +1,12 @@
 // Pantalla para registrar una compra. Sin SQL: todo pasa por los hooks.
 
-import { useCallback, useRef } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { FlatList, Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PurchaseHeaderFields } from '@/components/purchases/purchase-header-fields';
 import { PurchaseLineCard } from '@/components/purchases/purchase-line-card';
+import { PurchaseReviewModal } from '@/components/purchases/purchase-review-modal';
 import { PurchaseTotalsFooter } from '@/components/purchases/purchase-totals-footer';
 import { Spacing } from '@/constants/theme';
 import { useDayNavigation } from '@/hooks/use-day-navigation';
@@ -14,6 +15,7 @@ import { usePurchaseForm } from '@/hooks/use-purchase-form';
 import { usePurchaseMeta } from '@/hooks/use-purchase-meta';
 import { useTheme } from '@/hooks/use-theme';
 import type { PurchaseLineForm } from '@/lib/purchase-form';
+import { buildPurchaseReview } from '@/lib/purchase-review';
 
 export default function PurchaseFormScreen() {
   const theme = useTheme();
@@ -23,6 +25,19 @@ export default function PurchaseFormScreen() {
   const meta = usePurchaseMeta();
   const form = usePurchaseForm(day.date, meta.lastExchangeRateText);
   const listRef = useRef<FlatList<PurchaseLineForm>>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const review = useMemo(
+    () =>
+      buildPurchaseReview({
+        dateLabel: day.label,
+        values: form.values,
+        lineTotals: form.lineTotals,
+        totalCents: form.totalCents,
+        totalMxnCents: form.totalMxnCents,
+      }),
+    [day.label, form.values, form.lineTotals, form.totalCents, form.totalMxnCents]
+  );
 
   const scrollToEnd = useCallback(() => {
     listRef.current?.scrollToEnd({ animated: true });
@@ -34,6 +49,24 @@ export default function PurchaseFormScreen() {
     form.addLine();
     scrollSoon();
   }, [form, scrollSoon]);
+  const openReview = useCallback(() => {
+    if (saved || !form.validateForReview()) return;
+    Keyboard.dismiss();
+    setReviewOpen(true);
+  }, [form, saved]);
+  const backToEdit = useCallback(() => {
+    if (!form.saving) setReviewOpen(false);
+  }, [form.saving]);
+  const confirmReview = useCallback(async () => {
+    if (saved || form.saving) {
+      return;
+    }
+    const ok = await form.save();
+    setReviewOpen(false);
+    if (ok) {
+      setSaved(true);
+    }
+  }, [form, saved]);
 
   return (
     <SafeAreaView
@@ -87,11 +120,19 @@ export default function PurchaseFormScreen() {
             totalMxnCents={form.totalMxnCents}
             lineCount={form.lines.length}
             generalError={form.errors.general ?? form.generalError}
-            saving={form.saving}
+            saving={form.saving || saved}
             onAddLine={addLine}
-            onSave={() => void form.save()}
+            onReview={openReview}
           />
         }
+      />
+
+      <PurchaseReviewModal
+        visible={reviewOpen}
+        review={review}
+        saving={form.saving}
+        onBack={backToEdit}
+        onConfirm={confirmReview}
       />
     </SafeAreaView>
   );

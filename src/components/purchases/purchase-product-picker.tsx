@@ -1,9 +1,10 @@
-// Botón y modal para elegir el producto de un renglón de compra.
+// Botón y modal para elegir el producto de una compra.
 
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { PurchaseProductList } from '@/components/purchases/purchase-product-list';
+import { PurchaseProductSheet } from '@/components/purchases/purchase-product-sheet';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import type { ProductWithStock } from '@/db/products-with-stock';
@@ -55,34 +56,18 @@ export function PurchaseProductPicker({
         visible={open}
         animationType="slide"
         onRequestClose={() => setOpen(false)}>
-        <View style={styles.overlay}>
-          <Pressable
-            style={styles.backdrop}
-            onPress={() => setOpen(false)}
-            accessibilityRole="button"
-            accessibilityLabel="Cerrar buscador"
+        {/* Provider propio: los insets del Modal no son los de la pantalla. */}
+        <SafeAreaProvider>
+          <PurchaseProductSheet
+            products={products}
+            selectedProductId={selectedProductId}
+            loading={loading}
+            query={query}
+            onQueryChange={setQuery}
+            onSelect={choose}
+            onClose={() => setOpen(false)}
           />
-          <View style={[styles.sheet, { backgroundColor: theme.background }]}>
-            <View style={styles.sheetHeader}>
-              <ThemedText type="subtitle">Elegir producto</ThemedText>
-              <Pressable
-                onPress={() => setOpen(false)}
-                accessibilityRole="button"
-                accessibilityLabel="Cerrar"
-                style={styles.close}>
-                <ThemedText type="smallBold">Cerrar</ThemedText>
-              </Pressable>
-            </View>
-            <PurchaseProductList
-              products={products}
-              selectedProductId={selectedProductId}
-              loading={loading}
-              query={query}
-              onQueryChange={setQuery}
-              onSelect={choose}
-            />
-          </View>
-        </View>
+        </SafeAreaProvider>
       </Modal>
     </>
   );
@@ -96,26 +81,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pressed: { opacity: 0.7 },
-  overlay: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  sheet: {
-    maxHeight: '85%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  close: { minHeight: 48, justifyContent: 'center', paddingHorizontal: Spacing.two },
 });

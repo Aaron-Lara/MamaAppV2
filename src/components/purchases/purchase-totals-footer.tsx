@@ -1,4 +1,4 @@
-// Pie del formulario: totales, ayuda, agregar renglón y guardar.
+// Pie del formulario: totales, ayuda, agregar producto y revisar.
 
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -17,7 +17,7 @@ type Props = {
   generalError?: string;
   saving: boolean;
   onAddLine: () => void;
-  onSave: () => void;
+  onReview: () => void;
 };
 
 export function PurchaseTotalsFooter({
@@ -28,7 +28,7 @@ export function PurchaseTotalsFooter({
   generalError,
   saving,
   onAddLine,
-  onSave,
+  onReview,
 }: Props) {
   const theme = useTheme();
   const status = useStatusColors();
@@ -61,7 +61,7 @@ export function PurchaseTotalsFooter({
         onPress={onAddLine}
         disabled={!canAdd}
         accessibilityRole="button"
-        accessibilityLabel="Agregar renglón"
+        accessibilityLabel="Agregar producto"
         accessibilityState={{ disabled: !canAdd }}
         style={({ pressed }) => [
           styles.secondary,
@@ -71,22 +71,22 @@ export function PurchaseTotalsFooter({
           },
         ]}>
         <ThemedText type="smallBold">
-          + Agregar renglón ({lineCount} de {MAX_PURCHASE_LINES})
+          + Agregar producto ({lineCount} de {MAX_PURCHASE_LINES})
         </ThemedText>
       </Pressable>
 
       <Pressable
-        onPress={onSave}
+        onPress={onReview}
         disabled={saving}
         accessibilityRole="button"
-        accessibilityLabel="Guardar compra"
+        accessibilityLabel="Revisar compra"
         accessibilityState={{ disabled: saving }}
         style={({ pressed }) => [
           styles.save,
           { backgroundColor: theme.text, opacity: saving || pressed ? 0.7 : 1 },
         ]}>
         <ThemedText type="smallBold" style={{ color: theme.background }}>
-          {saving ? 'Guardando…' : 'Guardar compra'}
+          Revisar compra
         </ThemedText>
       </Pressable>
     </View>

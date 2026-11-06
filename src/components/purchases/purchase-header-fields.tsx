@@ -113,11 +113,11 @@ export function PurchaseHeaderFields({
           error={rateError}
           keyboardType="decimal-pad"
           placeholder="20.50"
-          hint="Se usa para convertir cada renglón a pesos."
+          hint="Se usa para convertir cada producto a pesos."
         />
       ) : null}
 
-      <ThemedText type="smallBold">Renglones</ThemedText>
+      <ThemedText type="smallBold">Productos</ThemedText>
     </View>
   );
 }

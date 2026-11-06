@@ -1,6 +1,5 @@
-// Estado del formulario de compras: renglones, validación, guardado y bloqueo
+// Estado del formulario de compras: productos, validación, guardado y bloqueo
 // de doble toque. La pantalla no escribe SQL.
-
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -37,10 +36,7 @@ export function usePurchaseForm(purchaseDate: string, lastExchangeRateText: stri
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
   const lineCounter = useRef(1);
-  const result = useMemo(
-    () => validatePurchaseForm(values, purchaseDate),
-    [values, purchaseDate]
-  );
+  const result = useMemo(() => validatePurchaseForm(values, purchaseDate), [values, purchaseDate]);
   const errors = useMemo(() => {
     if (!showErrors) {
       return emptyPurchaseErrors();
@@ -49,21 +45,20 @@ export function usePurchaseForm(purchaseDate: string, lastExchangeRateText: stri
       ? withLineProductError(result.errors, dbError.key, dbError.message)
       : result.errors;
   }, [showErrors, result.errors, dbError]);
-  const setStore = useCallback((store: string) => {
-    setValues((current) => ({ ...current, store }));
-  }, []);
-  const setExchangeRate = useCallback((exchangeRate: string) => {
-    setValues((current) => ({ ...current, exchangeRate }));
-  }, []);
-  const setCurrency = useCallback(
-    (currency: PurchaseCurrency) => {
-      setValues((current) =>
-        changePurchaseCurrency(current, currency, lastExchangeRateText)
-      );
-      setDbError(null);
-    },
-    [lastExchangeRateText]
+  const setStore = useCallback(
+    (store: string) => setValues((current) => ({ ...current, store })),
+    []
   );
+  const setExchangeRate = useCallback(
+    (exchangeRate: string) => setValues((current) => ({ ...current, exchangeRate })),
+    []
+  );
+  const setCurrency = useCallback((currency: PurchaseCurrency) => {
+    setValues((current) =>
+      changePurchaseCurrency(current, currency, lastExchangeRateText)
+    );
+    setDbError(null);
+  }, [lastExchangeRateText]);
   const updateLine = useCallback((key: string, patch: PurchaseLinePatch) => {
     setValues((current) => updatePurchaseLine(current, key, patch));
     setDbError((current) => (current?.key === key ? null : current));
@@ -90,9 +85,15 @@ export function usePurchaseForm(purchaseDate: string, lastExchangeRateText: stri
     );
     setDbError((current) => (current?.key === key ? null : current));
   }, []);
-  const save = useCallback(async () => {
+  const validateForReview = useCallback(() => {
+    setShowErrors(true);
+    setGeneralError('');
+    setDbError(null);
+    return validatePurchaseForm(values, purchaseDate).ok;
+  }, [values, purchaseDate]);
+  const save = useCallback(async (): Promise<boolean> => {
     if (savingRef.current) {
-      return;
+      return false;
     }
     savingRef.current = true;
     setSaving(true);
@@ -102,7 +103,7 @@ export function usePurchaseForm(purchaseDate: string, lastExchangeRateText: stri
     try {
       const check = validatePurchaseForm(values, purchaseDate);
       if (!check.ok || !check.input) {
-        return;
+        return false;
       }
       await createPurchase(db, check.input, purchaseDate);
       Alert.alert(
@@ -110,13 +111,15 @@ export function usePurchaseForm(purchaseDate: string, lastExchangeRateText: stri
         `Total en pesos: ${formatCents(check.totalMxnCents)}`,
         [{ text: 'Aceptar', onPress: () => router.back() }]
       );
+      return true;
     } catch (error) {
       const failure = describePurchaseSaveError(error, values.lines);
       if (failure.lineKey) {
         setDbError({ key: failure.lineKey, message: failure.message });
-        return;
+        return false;
       }
       setGeneralError(failure.message);
+      return false;
     } finally {
       savingRef.current = false;
       setSaving(false);
@@ -140,6 +143,7 @@ export function usePurchaseForm(purchaseDate: string, lastExchangeRateText: stri
     addLine,
     removeLine,
     selectProduct,
+    validateForReview,
     save,
   };
 }

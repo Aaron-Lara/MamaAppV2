@@ -1,5 +1,5 @@
 // Validación pura del formulario de compras: texto de la usuaria -> input de
-// createPurchase. Junta todos los errores por campo y por renglón a la vez.
+// createPurchase. Junta todos los errores por campo y por producto a la vez.
 
 import { convertToMxnCents, MXN_RATE_X10000, parseExchangeRate } from './exchange-rate';
 import { unitCostCents } from './purchase-cost';
@@ -50,9 +50,9 @@ export function validatePurchaseForm(
   }
 
   if (values.lines.length === 0) {
-    errors.general = 'La compra necesita al menos un renglón.';
+    errors.general = 'La compra necesita al menos un producto.';
   } else if (values.lines.length > MAX_PURCHASE_LINES) {
-    errors.general = `Una compra no puede pasar de ${MAX_PURCHASE_LINES} renglones.`;
+    errors.general = `Una compra no puede pasar de ${MAX_PURCHASE_LINES} productos.`;
   }
 
   values.lines.forEach((line) => {
@@ -76,7 +76,7 @@ export function validatePurchaseForm(
     }
 
     if (line.productId !== null && (!Number.isSafeInteger(line.productId) || line.productId <= 0)) {
-      lineErrors.product = 'El producto del renglón no es válido.';
+      lineErrors.product = 'El producto no es válido.';
     }
 
     if (cost.cents !== null) {
