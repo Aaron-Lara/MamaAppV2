@@ -20,6 +20,10 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Label>Inventario</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="shippingbox" md="inventory_2" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="orders">
+        <NativeTabs.Trigger.Label>Pedidos</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="clipboard" md="assignment" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="debts">
         <NativeTabs.Trigger.Label>Fiados</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.2" md="group" />

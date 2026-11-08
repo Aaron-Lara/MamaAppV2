@@ -3,19 +3,15 @@
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { insertSaleStockMovements } from '@/db/stock-sales';
+import { insertSaleInTransaction } from '@/db/sales-insert';
+import type { PaymentMethod, SaleItemInput } from '@/db/sales-insert';
 import { isValidDateString, localDateString } from '@/lib/dates';
 import { lineTotalCents, sumCents } from '@/lib/money';
 
-export type PaymentMethod = 'cash' | 'credit';
+export type { PaymentMethod } from '@/db/sales-insert';
 export type SaleStatus = 'active' | 'void';
 
-export type NewSaleItem = {
-  productId?: number | null;
-  description: string;
-  quantity: number;
-  unitPriceCents: number;
-};
+export type NewSaleItem = SaleItemInput;
 
 export type NewSale = {
   paymentMethod: PaymentMethod;
@@ -83,63 +79,16 @@ function validateSale(input: NewSale): ValidSale {
  */
 export async function recordSale(db: SQLiteDatabase, input: NewSale): Promise<number> {
   const { items, customerId, saleDate, totalCents } = validateSale(input);
-  const productIds = [
-    ...new Set(items.map((item) => item.productId).filter((id): id is number => id != null)),
-  ];
 
   let saleId = 0;
   await db.withExclusiveTransactionAsync(async (txn) => {
-    // La conexión exclusiva nace con foreign_keys en OFF: verificamos a mano.
-    if (customerId !== null) {
-      const customer = await txn.getFirstAsync<{ id: number }>(
-        'SELECT id FROM customers WHERE id = $id',
-        { $id: customerId }
-      );
-      if (!customer) {
-        throw new Error('El cliente de la venta no existe.');
-      }
-    }
-    for (const productId of productIds) {
-      const product = await txn.getFirstAsync<{ id: number }>(
-        'SELECT id FROM products WHERE id = $id',
-        { $id: productId }
-      );
-      if (!product) {
-        throw new Error(`El producto ${productId} no existe.`);
-      }
-    }
-
-    const result = await txn.runAsync(
-      `INSERT INTO sales (sale_date, customer_id, payment_method, total_cents)
-       VALUES ($saleDate, $customerId, $paymentMethod, $totalCents)`,
-      {
-        $saleDate: saleDate,
-        $customerId: customerId,
-        $paymentMethod: input.paymentMethod,
-        $totalCents: totalCents,
-      }
-    );
-    saleId = result.lastInsertRowId;
-
-    const statement = await txn.prepareAsync(
-      `INSERT INTO sale_items (sale_id, product_id, description, quantity, unit_price_cents)
-       VALUES ($saleId, $productId, $description, $quantity, $unitPriceCents)`
-    );
-    try {
-      for (const item of items) {
-        await statement.executeAsync({
-          $saleId: saleId,
-          $productId: item.productId ?? null,
-          $description: item.description,
-          $quantity: item.quantity,
-          $unitPriceCents: item.unitPriceCents,
-        });
-      }
-    } finally {
-      await statement.finalizeAsync();
-    }
-    // Dentro de la misma transacción: la venta y su salida de stock viven o mueren juntas.
-    await insertSaleStockMovements(txn, { saleId, movementDate: saleDate, lines: items });
+    saleId = await insertSaleInTransaction(txn, {
+      paymentMethod: input.paymentMethod,
+      customerId,
+      items,
+      saleDate,
+      totalCents,
+    });
   });
 
   if (saleId === 0) {

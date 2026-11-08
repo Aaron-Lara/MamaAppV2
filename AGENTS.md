@@ -55,7 +55,7 @@ Provisional: las reglas del negocio se ajustarán tras hablar con la usuaria.
 - La IA (voz, foto, resúmenes) va en src/ai/, detrás de funciones aisladas.
   Nunca bloquea el registro de una venta.
 - La app debe funcionar sin internet.
-- Archivos de menos de 150 líneas. Variables en inglés, comentarios en español.
+- Archivos de 150 - 200 líneas. Variables en inglés, comentarios en español.
 
 ### Reglas del negocio
 - Cada venta descuenta insumos según la receta del producto.
