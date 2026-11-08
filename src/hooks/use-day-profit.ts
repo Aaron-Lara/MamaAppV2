@@ -1,16 +1,20 @@
-// Carga de la ganancia estimada del día. Las pantallas no escriben SQL.
+// Carga de la ganancia neta estimada del día. Las pantallas no escriben SQL.
 
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useRef, useState } from 'react';
 
 import { getDayProfitInputs } from '@/db/day-profit';
-import { estimateDayProfit, type ProfitEstimate } from '@/lib/profit-estimate';
+import {
+  applyDayExpenses,
+  estimateDayProfit,
+  type NetProfitEstimate,
+} from '@/lib/profit-estimate';
 
 const LOAD_ERROR = 'No se pudo calcular la ganancia estimada.';
 
 export type DayProfitState = {
-  profit: ProfitEstimate | null;
+  profit: NetProfitEstimate | null;
   loading: boolean;
   error: string | null;
   reload: () => Promise<void>;
@@ -18,7 +22,7 @@ export type DayProfitState = {
 
 type LoadedProfit = {
   date: string;
-  profit: ProfitEstimate;
+  profit: NetProfitEstimate;
 };
 
 export function useDayProfit(date: string): DayProfitState {
@@ -35,7 +39,11 @@ export function useDayProfit(date: string): DayProfitState {
     setLoading(true);
     try {
       const inputs = await getDayProfitInputs(db, date);
-      const profit = estimateDayProfit(inputs.rows, inputs.costs);
+      const profit = applyDayExpenses(
+        estimateDayProfit(inputs.rows, inputs.costs),
+        inputs.expenses.totalCents,
+        inputs.expenses.count
+      );
       if (request !== requestId.current) {
         return;
       }

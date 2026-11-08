@@ -7,7 +7,7 @@ import { SummaryHeader } from '@/components/summary/summary-header';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import type { DaySummary } from '@/db/day-summary';
-import type { ProfitEstimate } from '@/lib/profit-estimate';
+import type { NetProfitEstimate } from '@/lib/profit-estimate';
 
 type Props = {
   label: string;
@@ -18,7 +18,7 @@ type Props = {
   summaryLoading: boolean;
   summaryError: string | null;
   onRetrySummary: () => void;
-  profit: ProfitEstimate | null;
+  profit: NetProfitEstimate | null;
   profitLoading: boolean;
   profitError: string | null;
   onRetryProfit: () => void;

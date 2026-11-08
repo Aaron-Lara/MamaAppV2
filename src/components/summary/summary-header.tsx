@@ -13,7 +13,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { DaySummary } from '@/db/day-summary';
-import type { ProfitEstimate } from '@/lib/profit-estimate';
+import type { NetProfitEstimate } from '@/lib/profit-estimate';
 
 type Props = {
   label: string;
@@ -24,7 +24,7 @@ type Props = {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
-  profit: ProfitEstimate | null;
+  profit: NetProfitEstimate | null;
   profitLoading: boolean;
   profitError: string | null;
   onRetryProfit: () => void;

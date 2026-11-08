@@ -1,13 +1,19 @@
-// Insumos de la ganancia del día: ventas activas agrupadas por producto y el
-// último costo conocido de cada producto. Solo lectura, dos consultas fijas.
+// Insumos de la ganancia del día: ventas activas agrupadas por producto, el
+// último costo conocido de cada producto y los gastos activos del día.
+// Solo lectura, tres consultas fijas.
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import {
+  summarizeActiveExpenses,
+  type ActiveExpenseSummary,
+} from '@/db/expenses-list';
 import type { ProductCost, ProfitInputRow } from '@/lib/profit-estimate';
 
 export type DayProfitInputs = {
   rows: ProfitInputRow[];
   costs: ProductCost[];
+  expenses: ActiveExpenseSummary;
 };
 
 type SoldRow = {
@@ -60,14 +66,15 @@ const COST_ROWS_SQL = `
             i.id DESC
 `;
 
-/** Filas del día y costos conocidos, sin una consulta por producto. */
+/** Filas, costos y gastos del día, sin una consulta por producto. */
 export async function getDayProfitInputs(
   db: SQLiteDatabase,
   date: string
 ): Promise<DayProfitInputs> {
-  const [soldRows, costRows] = await Promise.all([
+  const [soldRows, costRows, expenses] = await Promise.all([
     db.getAllAsync<SoldRow>(SOLD_ROWS_SQL, { $date: date }),
     db.getAllAsync<CostRow>(COST_ROWS_SQL, { $date: date }),
+    summarizeActiveExpenses(db, { date }),
   ]);
 
   const costs = new Map<number, ProductCost>();
@@ -88,5 +95,6 @@ export async function getDayProfitInputs(
       revenueCents: row.revenue_cents,
     })),
     costs: [...costs.values()],
+    expenses,
   };
 }

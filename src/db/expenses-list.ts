@@ -88,17 +88,35 @@ export async function listExpenses(
   return rows.map(mapExpenseRow);
 }
 
+export type ActiveExpenseSummary = {
+  totalCents: number;
+  count: number;
+};
+
+/** Total y cantidad de gastos activos; lo anulado queda fuera del cálculo. */
+export async function summarizeActiveExpenses(
+  db: SQLiteDatabase,
+  options: ActiveExpenseOptions = {}
+): Promise<ActiveExpenseSummary> {
+  const filters = buildFilters({ ...options, status: 'active' });
+  const row = await db.getFirstAsync<{ total: number; count: number }>(
+    `SELECT COALESCE(SUM(amount_cents), 0) AS total,
+            COUNT(*) AS count
+       FROM expenses
+       ${filters.where}`,
+    filters.params
+  );
+  return {
+    totalCents: row?.total ?? 0,
+    count: row?.count ?? 0,
+  };
+}
+
 /** Suma solo gastos activos; lo anulado queda fuera del cálculo. */
 export async function sumActiveExpenses(
   db: SQLiteDatabase,
   options: ActiveExpenseOptions = {}
 ): Promise<number> {
-  const filters = buildFilters({ ...options, status: 'active' });
-  const row = await db.getFirstAsync<{ total: number }>(
-    `SELECT COALESCE(SUM(amount_cents), 0) AS total
-       FROM expenses
-       ${filters.where}`,
-    filters.params
-  );
-  return row?.total ?? 0;
+  const summary = await summarizeActiveExpenses(db, options);
+  return summary.totalCents;
 }

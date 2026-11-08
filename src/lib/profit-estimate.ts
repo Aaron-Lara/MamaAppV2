@@ -26,6 +26,16 @@ export type ProfitEstimate = {
   hasKnownCosts: boolean;
 };
 
+/** Ganancia neta: la estimación bruta menos los gastos activos del día. */
+export type NetProfitEstimate = ProfitEstimate & {
+  expensesCents: number;
+  expensesCount: number;
+  netProfitCents: number;
+  isNetLoss: boolean;
+  /** Solo hay cifra neta si no hubo ventas o si al menos una tuvo costo. */
+  hasKnownNet: boolean;
+};
+
 type Group = { units: number; revenueCents: number };
 
 function addSafe(current: number, amount: number, label: string): number {
@@ -144,5 +154,37 @@ export function estimateDayProfit(
     uncostedProductCount,
     hasSales: groups.size > 0,
     hasKnownCosts,
+  };
+}
+
+/**
+ * Resta los gastos activos del día a la ganancia estimada.
+ * No suma ventas sin costo: la cifra neta solo se considera conocida si no
+ * hubo ventas o si al menos una venta tuvo costo conocido.
+ */
+export function applyDayExpenses(
+  profit: ProfitEstimate,
+  expensesCents: number,
+  expensesCount: number
+): NetProfitEstimate {
+  if (!Number.isSafeInteger(expensesCents) || expensesCents < 0) {
+    throw new Error('Los gastos deben ser un entero mayor o igual a cero.');
+  }
+  if (!Number.isSafeInteger(expensesCount) || expensesCount < 0) {
+    throw new Error('La cantidad de gastos debe ser un entero mayor o igual a cero.');
+  }
+
+  const netProfitCents = profit.profitCents - expensesCents;
+  if (!Number.isSafeInteger(netProfitCents)) {
+    throw new Error('La ganancia neta se sale del rango seguro de enteros.');
+  }
+
+  return {
+    ...profit,
+    expensesCents,
+    expensesCount,
+    netProfitCents,
+    isNetLoss: netProfitCents < 0,
+    hasKnownNet: !profit.hasSales || profit.hasKnownCosts,
   };
 }
