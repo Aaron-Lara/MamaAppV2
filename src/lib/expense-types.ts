@@ -4,6 +4,12 @@
 export const MAX_EXPENSE_CATEGORY_LENGTH = 60;
 export const MAX_EXPENSE_DESCRIPTION_LENGTH = 200;
 
+/**
+ * Motivo interno para la anulación rápida. El esquema exige un motivo no
+ * vacío cuando el estado es 'void', pero la interfaz ya no lo pide.
+ */
+export const DEFAULT_EXPENSE_VOID_REASON = 'Anulado desde la app.';
+
 export type ExpenseStatus = 'active' | 'void';
 
 export type NewExpenseInput = {

@@ -2,6 +2,7 @@
 
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { ExpensesEntryLink } from '@/components/expenses/expenses-entry-link';
 import { DaySelector } from '@/components/summary/day-selector';
 import { ProfitEstimateCard } from '@/components/summary/profit-estimate-card';
 import { RetryBlock } from '@/components/summary/retry-block';
@@ -47,7 +48,10 @@ export function SummaryHeader({
 
   return (
     <View style={styles.header}>
-      <ThemedText type="subtitle">Resumen</ThemedText>
+      <View style={styles.titleRow}>
+        <ThemedText type="subtitle">Resumen</ThemedText>
+        <ExpensesEntryLink />
+      </View>
       <DaySelector label={label} canGoNext={canGoNext} onPrev={onPrev} onNext={onNext} />
 
       {loading && !summary ? (
@@ -82,6 +86,12 @@ export function SummaryHeader({
 const styles = StyleSheet.create({
   header: {
     gap: Spacing.three,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
   },
   centered: {
     alignItems: 'center',

@@ -20,6 +20,9 @@ export default function RootLayout() {
           <Stack.Screen name="order-detail" options={{ title: 'Detalle de pedido' }} />
           <Stack.Screen name="stock-adjust" options={{ title: 'Ajustar stock' }} />
           <Stack.Screen name="customer-detail" options={{ title: 'Detalle del cliente' }} />
+          <Stack.Screen name="expenses" options={{ title: 'Gastos' }} />
+          <Stack.Screen name="expense-form" options={{ title: 'Nuevo gasto' }} />
+          <Stack.Screen name="expense-detail" options={{ title: 'Detalle de gasto' }} />
         </Stack>
       </ThemeProvider>
     </SQLiteProvider>
