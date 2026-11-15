@@ -105,3 +105,12 @@ export function dayLabel(date: string, today: string): string {
   }
   return formatWrittenDate(parts, todayParts);
 }
+
+/** Fecha escrita completa con año: "3 de noviembre de 2026". */
+export function writtenDate(date: string): string {
+  const parts = parseDate(date);
+  if (!parts) {
+    return INVALID_DAY_LABEL;
+  }
+  return `${parts.day} de ${MONTHS[parts.month - 1]} de ${parts.year}`;
+}

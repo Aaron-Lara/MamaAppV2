@@ -3,6 +3,7 @@ import {
   dayLabel,
   INVALID_DAY_LABEL,
   shiftDay,
+  writtenDate,
 } from '../day-navigation';
 
 describe('shiftDay', () => {
@@ -90,5 +91,17 @@ describe('dayLabel', () => {
 
   test('con hoy inválido escribe la fecha con año', () => {
     expect(dayLabel('2025-12-31', 'hoy')).toBe('31 de diciembre de 2025');
+  });
+});
+
+describe('writtenDate', () => {
+  test('escribe la fecha completa con año', () => {
+    expect(writtenDate('2026-11-03')).toBe('3 de noviembre de 2026');
+    expect(writtenDate('2026-01-09')).toBe('9 de enero de 2026');
+  });
+
+  test('con fecha inválida devuelve el aviso', () => {
+    expect(writtenDate('2026-02-30')).toBe(INVALID_DAY_LABEL);
+    expect(writtenDate('')).toBe(INVALID_DAY_LABEL);
   });
 });
