@@ -1,6 +1,5 @@
 // Pestaña Resumen: selector, tarjetas, top, revisión y ventas del día.
 
-import { Link } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -105,13 +104,6 @@ export default function SummaryScreen() {
               )
             ) : undefined
           }
-          ListFooterComponent={
-            <Link href="/dev" style={styles.link}>
-              <ThemedText type="link" themeColor="textSecondary">
-                Pruebas (temporal)
-              </ThemedText>
-            </Link>
-          }
           contentContainerStyle={[
             styles.content,
             { paddingBottom: insets.bottom + Spacing.four },
@@ -138,11 +130,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.four,
-  },
-  link: {
-    alignSelf: 'flex-start',
-    minHeight: 48,
-    justifyContent: 'center',
-    paddingRight: Spacing.two,
   },
 });

@@ -11,7 +11,6 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="dev" options={{ title: 'Pruebas (temporal)' }} />
           <Stack.Screen name="product-form" options={{ title: 'Nuevo producto' }} />
           <Stack.Screen name="purchase-form" options={{ title: 'Nueva compra' }} />
           <Stack.Screen name="purchases" options={{ title: 'Compras' }} />
