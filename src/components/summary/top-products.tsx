@@ -7,17 +7,25 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { DayTopProduct } from '@/db/day-summary';
 
-type Props = { products: DayTopProduct[] };
+type Props = {
+  products: DayTopProduct[];
+  title?: string;
+  emptyMessage?: string;
+};
 
-export function TopProducts({ products }: Props) {
+export function TopProducts({
+  products,
+  title = 'Lo más vendido',
+  emptyMessage = 'Sin ventas este día.',
+}: Props) {
   const theme = useTheme();
 
   return (
     <View style={styles.section}>
-      <ThemedText type="smallBold">Lo más vendido</ThemedText>
+      <ThemedText type="smallBold">{title}</ThemedText>
       {products.length === 0 ? (
         <ThemedText type="small" themeColor="textSecondary">
-          Sin ventas este día.
+          {emptyMessage}
         </ThemedText>
       ) : (
         products.map((product, index) => (
