@@ -39,12 +39,14 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
-- Nada se borra: las ventas se anulan, los productos y clientes se desactivan. Toda acción irreversible o de cantidad grande exige confirmación en pantalla. Los mensajes al usuario nunca muestran números negativos de stock
+- Nada se borra: las ventas se anulan y los productos se desactivan. Los clientes no se borran ni se desactivan actualmente. Toda acción irreversible o de cantidad grande exige confirmación en pantalla. Los mensajes al usuario nunca muestran números negativos de stock
 - Los reportes, saldos y totales solo cuentan ventas con status = 'active'.
 - Anular una venta nunca la borra: marca status = 'void' y compensa el stock con movimientos 'void'.
+- Los pedidos no se borran: se cancelan. Entregar un pedido crea la venta, descuenta stock y marca el pedido como entregado en una sola transacción.
+- Los gastos no se borran: se anulan con status = 'void', fecha y motivo. Las compras no son gastos.
 - Las fotos de tickets no se guardan: se procesan, se borra el archivo temporal y nunca se guarda su ruta. El proceso de lectura no debe bloquear ventas.
 - En stock_movements, el reference_id mezcla ids de ventas y compras: toda consulta por reference_id debe incluir también reason. La anulación de una compra compensa con reason 'purchase' y cantidad negativa, nunca con 'void'.
-- Los colores, espacios y tamaños de letra salen de src/constants/theme.ts y del hook useTheme
+- Los colores, espacios y tamaños de letra salen de src/constants/theme.ts y del hook useTheme. Quedan colores semánticos hardcodeados: centralizarlos es parte del rediseño visual pendiente.
 
 ## Proyecto: app POS e inventario (cooperativa escolar)
 Stack: Expo + TypeScript + expo-sqlite (offline-first).
@@ -52,15 +54,16 @@ Provisional: las reglas del negocio se ajustarán tras hablar con la usuaria.
 
 ### Arquitectura
 - Lógica de datos en src/db/. Las pantallas no escriben SQL.
-- La IA (voz, foto, resúmenes) va en src/ai/, detrás de funciones aisladas.
-  Nunca bloquea el registro de una venta.
+- Lógica pura (validaciones, cálculos, formato) en src/lib/. El estado de las pantallas vive en src/hooks/.
+- La IA (voz, foto, resúmenes) va en src/ai/, detrás de funciones aisladas, cuando se implemente. Hoy no existe src/ai/. Nunca debe bloquear el registro de una venta.
 - La app debe funcionar sin internet.
 - Archivos de 150 - 200 líneas. Variables en inglés, comentarios en español.
 
 ### Reglas del negocio
-- Cada venta descuenta insumos según la receta del producto.
-- Ganancia = ventas - costo de lo vendido - gastos.
+- Cada venta descuenta stock solo de los productos con track_stock = 1. Nunca se bloquea una venta por falta de stock. Las recetas e ingredientes son provisionales y no están implementados.
+- Ganancia bruta = ingresos con costo conocido - costo de lo vendido. Los ingresos sin costo conocido se reportan aparte. Ganancia neta = ganancia bruta - gastos activos.
 - Dinero siempre en centavos (enteros), nunca en decimales.
+- audit_log no existe ni está implementado. Es opcional y no debe confundirse con el historial de periodos de los reportes.
 
 ### Forma de trabajar
 - Responde en español. Ante ambigüedad, haz máximo 3 preguntas.
