@@ -4,9 +4,11 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ReportsEntryLink } from '@/components/reports/reports-entry-link';
+import { DayClosingCard } from '@/components/summary/day-closing-card';
 import { SummaryHeader } from '@/components/summary/summary-header';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useDayClosing } from '@/hooks/use-day-closing';
 import type { DaySummary } from '@/db/day-summary';
 import type { NetProfitEstimate } from '@/lib/profit-estimate';
 
@@ -49,6 +51,14 @@ export function SummaryListHeader({
   activeCount,
   voidedCount,
 }: Props) {
+  const closing = useDayClosing(
+    label,
+    summary,
+    profit,
+    profitLoading,
+    profitError !== null
+  );
+
   return (
     <View style={styles.header}>
       <SummaryHeader
@@ -65,6 +75,7 @@ export function SummaryListHeader({
         profitError={profitError}
         onRetryProfit={onRetryProfit}
       />
+      {closing ? <DayClosingCard closing={closing} /> : null}
       <View style={styles.salesHeader}>
         <View style={styles.salesHeaderText}>
           <ThemedText type="smallBold">Ventas del día</ThemedText>
