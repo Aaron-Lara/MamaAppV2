@@ -3,6 +3,7 @@
 
 import { StyleSheet, View } from 'react-native';
 
+import { ReportsEntryLink } from '@/components/reports/reports-entry-link';
 import { SummaryHeader } from '@/components/summary/summary-header';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -65,10 +66,13 @@ export function SummaryListHeader({
         onRetryProfit={onRetryProfit}
       />
       <View style={styles.salesHeader}>
-        <ThemedText type="smallBold">Ventas del día</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {salesCountLabel(activeCount, voidedCount)}
-        </ThemedText>
+        <View style={styles.salesHeaderText}>
+          <ThemedText type="smallBold">Ventas del día</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {salesCountLabel(activeCount, voidedCount)}
+          </ThemedText>
+        </View>
+        <ReportsEntryLink />
       </View>
     </View>
   );
@@ -79,6 +83,12 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   salesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  salesHeaderText: {
     gap: Spacing.half,
   },
 });
