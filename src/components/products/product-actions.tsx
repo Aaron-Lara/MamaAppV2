@@ -4,8 +4,9 @@
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, useColorScheme } from 'react-native';
+import { Alert } from 'react-native';
 
+import { AppButton } from '@/components/ui/app-button';
 import { ThemedText } from '@/components/themed-text';
 import { setProductActive } from '@/db/products-manage';
 import { useTheme } from '@/hooks/use-theme';
@@ -29,7 +30,6 @@ export function ProductActions({
 }: Props) {
   const db = useSQLiteContext();
   const theme = useTheme();
-  const errorColor = useColorScheme() === 'dark' ? '#ff8a80' : '#c62828';
   const [toggling, setToggling] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const busy = disabled || toggling;
@@ -72,58 +72,29 @@ export function ProductActions({
 
   return (
     <>
-      <Pressable
-        accessibilityRole="button"
+      <AppButton
+        label={isActive ? 'Desactivar producto' : 'Reactivar producto'}
+        variant="secondary"
         disabled={busy}
         onPress={confirmToggle}
-        style={({ pressed }) => [
-          styles.button,
-          styles.secondary,
-          { borderColor: theme.textSecondary },
-          (pressed || toggling) && styles.dimmed,
-        ]}>
-        <ThemedText type="smallBold">
-          {isActive ? 'Desactivar producto' : 'Reactivar producto'}
-        </ThemedText>
-      </Pressable>
+      />
 
       {trackStock ? (
-        <Pressable
-          accessibilityRole="button"
+        <AppButton
+          label="Ajustar stock"
+          variant="secondary"
           disabled={busy}
           onPress={() =>
             router.push({ pathname: '/stock-adjust', params: { id: String(productId) } })
           }
-          style={({ pressed }) => [
-            styles.button,
-            styles.secondary,
-            { borderColor: theme.textSecondary },
-            (pressed || toggling) && styles.dimmed,
-          ]}>
-          <ThemedText type="smallBold">Ajustar stock</ThemedText>
-        </Pressable>
+        />
       ) : null}
 
       {statusError ? (
-        <ThemedText type="small" style={{ color: errorColor }}>
+        <ThemedText type="small" style={{ color: theme.danger }}>
           {statusError}
         </ThemedText>
       ) : null}
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondary: {
-    borderWidth: 1,
-  },
-  dimmed: {
-    opacity: 0.6,
-  },
-});

@@ -32,14 +32,15 @@ export function MotivePicker({ value, onChange }: Props) {
             onPress={() => onChange(option.value)}
             style={({ pressed }) => [
               styles.option,
-              selected
-                ? { backgroundColor: theme.text }
-                : { borderWidth: 1, borderColor: theme.textSecondary },
+              {
+                backgroundColor: selected ? theme.primary : 'transparent',
+                borderColor: selected ? theme.primary : theme.textSecondary,
+              },
               pressed && styles.dimmed,
             ]}>
             <ThemedText
               type="smallBold"
-              style={selected ? { color: theme.background } : undefined}>
+              style={selected ? { color: theme.onPrimary } : undefined}>
               {option.label}
             </ThemedText>
           </Pressable>
@@ -57,6 +58,7 @@ const styles = StyleSheet.create({
   option: {
     flex: 1,
     minHeight: 48,
+    borderWidth: 1,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',

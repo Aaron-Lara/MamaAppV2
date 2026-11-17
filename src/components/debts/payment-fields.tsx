@@ -1,10 +1,10 @@
 // Campos visuales del formulario de abono.
 
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { AppButton } from '@/components/ui/app-button';
 import { Spacing } from '@/constants/theme';
-import { useStatusColors } from '@/hooks/use-status-colors';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCents } from '@/lib/money';
 import { MAX_PAYMENT_NOTE_LENGTH } from '@/lib/payment-input';
@@ -39,7 +39,6 @@ export function PaymentFields({
   onSubmit,
 }: Props) {
   const theme = useTheme();
-  const statusColors = useStatusColors();
 
   return (
     <View style={styles.container}>
@@ -56,22 +55,18 @@ export function PaymentFields({
           {
             backgroundColor: theme.backgroundElement,
             color: theme.text,
-            borderColor: error ? statusColors.error : 'transparent',
+            borderColor: error ? theme.danger : theme.textSecondary,
           },
         ]}
       />
 
-      <Pressable
-        onPress={onPayAll}
+      <AppButton
+        label={`Pagar todo (${formatCents(balanceCents)})`}
+        variant="secondary"
         disabled={saving}
-        accessibilityRole="button"
+        onPress={onPayAll}
         accessibilityLabel={`Pagar todo ${formatCents(balanceCents)}`}
-        style={({ pressed }) => [
-          styles.shortcut,
-          { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.7 : 1 },
-        ]}>
-        <ThemedText type="smallBold">Pagar todo ({formatCents(balanceCents)})</ThemedText>
-      </Pressable>
+      />
 
       <TextInput
         value={note}
@@ -81,33 +76,28 @@ export function PaymentFields({
         placeholderTextColor={theme.textSecondary}
         maxLength={MAX_PAYMENT_NOTE_LENGTH}
         accessibilityLabel="Nota del abono"
-        style={[styles.input, { backgroundColor: theme.backgroundElement, color: theme.text }]}
+        style={[
+          styles.input,
+          {
+            backgroundColor: theme.backgroundElement,
+            color: theme.text,
+            borderColor: theme.textSecondary,
+          },
+        ]}
       />
 
       {error ? (
-        <ThemedText type="small" style={{ color: statusColors.error }}>
+        <ThemedText type="small" style={{ color: theme.danger }}>
           {error}
         </ThemedText>
       ) : null}
 
-      <Pressable
-        onPress={onSubmit}
+      <AppButton
+        label="Registrar abono"
+        loading={saving}
         disabled={saving || confirming}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: saving || confirming, busy: saving }}
-        style={({ pressed }) => [
-          styles.submit,
-          { backgroundColor: theme.text },
-          (pressed || saving || confirming) && styles.dimmed,
-        ]}>
-        {saving ? (
-          <ActivityIndicator color={theme.background} />
-        ) : (
-          <ThemedText type="smallBold" style={{ color: theme.background }}>
-            Registrar abono
-          </ThemedText>
-        )}
-      </Pressable>
+        onPress={onSubmit}
+      />
     </View>
   );
 }
@@ -121,21 +111,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: Spacing.three,
-  },
-  shortcut: {
-    minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-    borderRadius: 12,
-  },
-  submit: {
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-    borderRadius: 12,
-  },
-  dimmed: {
-    opacity: 0.6,
   },
 });

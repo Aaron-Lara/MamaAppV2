@@ -70,7 +70,7 @@ export function PurchaseHeaderFields({
               accessibilityLabel={`Usar tienda ${name}`}
               style={({ pressed }) => [
                 styles.chip,
-                { backgroundColor: theme.backgroundElement },
+                { backgroundColor: theme.backgroundElement, borderColor: theme.textSecondary },
                 pressed && styles.pressed,
               ]}>
               <ThemedText type="smallBold">{name}</ThemedText>
@@ -92,12 +92,15 @@ export function PurchaseHeaderFields({
               accessibilityState={{ selected }}
               style={({ pressed }) => [
                 styles.currency,
-                { backgroundColor: selected ? theme.text : theme.backgroundElement },
+                {
+                  backgroundColor: selected ? theme.primary : theme.backgroundElement,
+                  borderColor: selected ? theme.primary : theme.textSecondary,
+                },
                 pressed && styles.pressed,
               ]}>
               <ThemedText
                 type="smallBold"
-                style={{ color: selected ? theme.background : theme.text }}>
+                style={{ color: selected ? theme.onPrimary : theme.text }}>
                 {option}
               </ThemedText>
             </Pressable>
@@ -127,6 +130,7 @@ const styles = StyleSheet.create({
   chips: { gap: Spacing.two, paddingVertical: Spacing.one },
   chip: {
     minHeight: 48,
+    borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: Spacing.three,
     justifyContent: 'center',
@@ -135,6 +139,7 @@ const styles = StyleSheet.create({
   currency: {
     flex: 1,
     minHeight: 48,
+    borderWidth: 1,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',

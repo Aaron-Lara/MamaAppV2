@@ -54,7 +54,8 @@ export function AppButton({
     secondary: {
       backgroundColor: theme.backgroundElement,
       pressedBackgroundColor: theme.backgroundSelected,
-      borderColor: theme.border,
+      // textSecondary da 6.37:1 (claro) y 9.59:1 (oscuro): el borde se distingue.
+      borderColor: theme.textSecondary,
       foregroundColor: theme.text,
     },
     ghost: {

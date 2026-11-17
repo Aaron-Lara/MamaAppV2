@@ -1,10 +1,10 @@
 // Pie del formulario: totales, ayuda, agregar producto y revisar.
 
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { AppButton } from '@/components/ui/app-button';
 import { Spacing } from '@/constants/theme';
-import { useStatusColors } from '@/hooks/use-status-colors';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCents } from '@/lib/money';
 import { MAX_PURCHASE_LINES, type PurchaseCurrency } from '@/lib/purchase-types';
@@ -31,7 +31,6 @@ export function PurchaseTotalsFooter({
   onReview,
 }: Props) {
   const theme = useTheme();
-  const status = useStatusColors();
   const canAdd = lineCount < MAX_PURCHASE_LINES;
 
   return (
@@ -52,43 +51,25 @@ export function PurchaseTotalsFooter({
       </View>
 
       {generalError ? (
-        <ThemedText type="small" style={{ color: status.error }}>
+        <ThemedText type="small" style={{ color: theme.danger }}>
           {generalError}
         </ThemedText>
       ) : null}
 
-      <Pressable
-        onPress={onAddLine}
+      <AppButton
+        label={`+ Agregar producto (${lineCount} de ${MAX_PURCHASE_LINES})`}
+        variant="secondary"
         disabled={!canAdd}
-        accessibilityRole="button"
+        onPress={onAddLine}
         accessibilityLabel="Agregar producto"
-        accessibilityState={{ disabled: !canAdd }}
-        style={({ pressed }) => [
-          styles.secondary,
-          {
-            backgroundColor: theme.backgroundElement,
-            opacity: !canAdd ? 0.35 : pressed ? 0.7 : 1,
-          },
-        ]}>
-        <ThemedText type="smallBold">
-          + Agregar producto ({lineCount} de {MAX_PURCHASE_LINES})
-        </ThemedText>
-      </Pressable>
+      />
 
-      <Pressable
-        onPress={onReview}
+      <AppButton
+        label="Revisar compra"
         disabled={saving}
-        accessibilityRole="button"
+        onPress={onReview}
         accessibilityLabel="Revisar compra"
-        accessibilityState={{ disabled: saving }}
-        style={({ pressed }) => [
-          styles.save,
-          { backgroundColor: theme.text, opacity: saving || pressed ? 0.7 : 1 },
-        ]}>
-        <ThemedText type="smallBold" style={{ color: theme.background }}>
-          Revisar compra
-        </ThemedText>
-      </Pressable>
+      />
     </View>
   );
 }
@@ -97,18 +78,4 @@ const styles = StyleSheet.create({
   container: { gap: Spacing.three, paddingTop: Spacing.two },
   totals: { borderRadius: 12, padding: Spacing.three, gap: Spacing.one },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
-  secondary: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-  },
-  save: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-  },
 });

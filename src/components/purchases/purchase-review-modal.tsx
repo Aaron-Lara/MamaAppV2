@@ -1,6 +1,6 @@
 // Paso obligatorio de revisión antes de guardar una compra.
 
-import { FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PurchaseReviewLineRow } from '@/components/purchases/purchase-review-line';
@@ -9,6 +9,7 @@ import {
   PurchaseReviewTotal,
 } from '@/components/purchases/purchase-review-summary';
 import { ThemedText } from '@/components/themed-text';
+import { AppButton } from '@/components/ui/app-button';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { PurchaseReview } from '@/lib/purchase-review';
@@ -61,36 +62,21 @@ export function PurchaseReviewModal({
         />
 
         <View style={styles.footer}>
-          <Pressable
+          <AppButton
+            label="Volver a editar"
+            variant="secondary"
+            disabled={saving}
             onPress={onBack}
-            disabled={saving}
-            accessibilityRole="button"
             accessibilityLabel="Volver a editar"
-            accessibilityState={{ disabled: saving }}
-            style={({ pressed }) => [
-              styles.secondary,
-              {
-                backgroundColor: theme.backgroundElement,
-                opacity: saving || pressed ? 0.7 : 1,
-              },
-            ]}>
-            <ThemedText type="smallBold">Volver a editar</ThemedText>
-          </Pressable>
+          />
 
-          <Pressable
-            onPress={onConfirm}
+          <AppButton
+            label={saving ? 'Guardando…' : 'Confirmar compra'}
+            loading={saving}
             disabled={saving}
-            accessibilityRole="button"
+            onPress={onConfirm}
             accessibilityLabel="Confirmar compra"
-            accessibilityState={{ disabled: saving, busy: saving }}
-            style={({ pressed }) => [
-              styles.primary,
-              { backgroundColor: theme.text, opacity: saving || pressed ? 0.7 : 1 },
-            ]}>
-            <ThemedText type="smallBold" style={{ color: theme.background }}>
-              {saving ? 'Guardando…' : 'Confirmar compra'}
-            </ThemedText>
-          </Pressable>
+          />
         </View>
       </SafeAreaView>
     </Modal>
@@ -112,19 +98,5 @@ const styles = StyleSheet.create({
   footer: {
     padding: Spacing.three,
     gap: Spacing.two,
-  },
-  secondary: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-  },
-  primary: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
   },
 });

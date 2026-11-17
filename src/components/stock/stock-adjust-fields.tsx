@@ -51,7 +51,7 @@ export function StockAdjustFields({
           style={[
             styles.input,
             inputStyle,
-            { borderColor: errors.counted ? errorColor : 'transparent' },
+            { borderColor: errors.counted ? errorColor : theme.textSecondary },
           ]}
         />
         {errors.counted ? (
@@ -79,7 +79,7 @@ export function StockAdjustFields({
               styles.input,
               styles.note,
               inputStyle,
-              { borderColor: errors.note ? errorColor : 'transparent' },
+              { borderColor: errors.note ? errorColor : theme.textSecondary },
             ]}
           />
           {errors.note ? (

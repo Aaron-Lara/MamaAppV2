@@ -1,17 +1,11 @@
 // Modal para entregar un pedido: efectivo o fiado y confirmación final.
 
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-import { useErrorColor } from '@/components/products/text-field';
 import { PaymentMethodPicker } from '@/components/sell/payment-method-picker';
 import { ThemedText } from '@/components/themed-text';
+import { AppButton } from '@/components/ui/app-button';
 import { Spacing } from '@/constants/theme';
 import { useDeliverOrder } from '@/hooks/use-deliver-order';
 import { useTheme } from '@/hooks/use-theme';
@@ -37,7 +31,6 @@ export function OrderDeliverModal({
   onRefresh,
 }: Props) {
   const theme = useTheme();
-  const errorColor = useErrorColor();
   const {
     method,
     setMethod,
@@ -89,49 +82,26 @@ export function OrderDeliverModal({
             </ThemedText>
 
             {error ? (
-              <ThemedText type="small" style={{ color: errorColor }}>
+              <ThemedText type="small" style={{ color: theme.danger }}>
                 {error}
               </ThemedText>
             ) : null}
 
             <View style={styles.footer}>
-              <Pressable
+              <AppButton
+                label="Volver"
+                variant="secondary"
+                disabled={delivering}
                 onPress={close}
-                disabled={delivering}
-                accessibilityRole="button"
                 accessibilityLabel="Volver"
-                accessibilityState={{ disabled: delivering }}
-                style={({ pressed }) => [
-                  styles.secondary,
-                  {
-                    backgroundColor: theme.backgroundElement,
-                    opacity: delivering || pressed ? 0.7 : 1,
-                  },
-                ]}>
-                <ThemedText type="smallBold">Volver</ThemedText>
-              </Pressable>
-
-              <Pressable
-                onPress={requestDeliver}
+              />
+              <AppButton
+                label="Entregar"
+                loading={delivering}
                 disabled={delivering}
-                accessibilityRole="button"
+                onPress={requestDeliver}
                 accessibilityLabel="Entregar pedido"
-                accessibilityState={{ disabled: delivering, busy: delivering }}
-                style={({ pressed }) => [
-                  styles.primary,
-                  {
-                    backgroundColor: theme.text,
-                    opacity: delivering || pressed ? 0.7 : 1,
-                  },
-                ]}>
-                {delivering ? (
-                  <ActivityIndicator color={theme.background} />
-                ) : (
-                  <ThemedText type="smallBold" style={{ color: theme.background }}>
-                    Entregar
-                  </ThemedText>
-                )}
-              </Pressable>
+              />
             </View>
           </View>
         </SafeAreaView>
@@ -154,19 +124,5 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     gap: Spacing.two,
     paddingBottom: Spacing.three,
-  },
-  secondary: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-  },
-  primary: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
   },
 });

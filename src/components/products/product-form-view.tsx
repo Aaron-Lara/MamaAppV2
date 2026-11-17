@@ -3,18 +3,17 @@
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useRef, useState, type ComponentRef } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductActions } from '@/components/products/product-actions';
 import { ProductFormFields } from '@/components/products/product-form-fields';
-import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { AppButton } from '@/components/ui/app-button';
 import { Spacing } from '@/constants/theme';
 import type { ProductWithStock } from '@/db/products-with-stock';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { useProductForm } from '@/hooks/use-product-form';
-import { useTheme } from '@/hooks/use-theme';
 import { productToFormValues } from '@/lib/product-form';
 
 type Props = { mode: 'create' } | { mode: 'edit'; product: ProductWithStock };
@@ -22,7 +21,6 @@ type Props = { mode: 'create' } | { mode: 'edit'; product: ProductWithStock };
 export function ProductFormView(props: Props) {
   const product = props.mode === 'edit' ? props.product : undefined;
   const db = useSQLiteContext();
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
@@ -55,24 +53,12 @@ export function ProductFormView(props: Props) {
           onChange={onChange}
           onFieldFocus={handleFieldFocus}
         />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: saving || actionsBusy, busy: saving }}
+        <AppButton
+          label="Guardar"
+          loading={saving}
           disabled={saving || actionsBusy}
           onPress={() => void save(db, () => router.back())}
-          style={({ pressed }) => [
-            styles.button,
-            { backgroundColor: theme.text },
-            (pressed || saving) && styles.dimmed,
-          ]}>
-          {saving ? (
-            <ActivityIndicator color={theme.background} />
-          ) : (
-            <ThemedText type="smallBold" style={{ color: theme.background }}>
-              Guardar
-            </ThemedText>
-          )}
-        </Pressable>
+        />
 
         {product ? (
           <ProductActions
@@ -95,14 +81,5 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.four,
     gap: Spacing.four,
-  },
-  button: {
-    minHeight: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dimmed: {
-    opacity: 0.6,
   },
 });
